@@ -11,10 +11,14 @@ edition = "2018"
 name = "calculator"
 path = "src/calculator/main.rs"
 
-
 [[bin]]
 name = "prototype"
 path = "src/prototype/main.rs"
+
+[[bin]]
+name = "wallet0"
+path = "src/wallet0/main.rs"
+
 
 [dependencies]
 calculate = "0.5.1"
