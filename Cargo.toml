@@ -11,6 +11,11 @@ edition = "2018"
 name = "calculator"
 path = "src/calculator/main.rs"
 
+
+[[bin]]
+name = "prototype"
+path = "src/prototype/main.rs"
+
 [dependencies]
 calculate = "0.5.1"
 chrono = "0.4"
