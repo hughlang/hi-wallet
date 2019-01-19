@@ -174,7 +174,6 @@ fn main() {
   let mut application = Application::new();
 
   let theme = format!("{}{}", DARK_THEME_EXTENSION, DEFAULT_THEME_CSS);
-  //let theme = format!("{}{}", LIGHT_THEME_EXTENSION, LIGHT_THEME_CSS);
 
   application
     .create_window()

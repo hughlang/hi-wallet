@@ -1,0 +1,10 @@
+debugborder {
+    border-width: 1;
+    border-radius: 0;
+    border-color: white;
+    background: transparent;
+}
+
+.full {	  
+    width: auto;
+}

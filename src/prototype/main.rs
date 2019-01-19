@@ -39,8 +39,8 @@ impl Widget for MainView {
       .as_parent_type(ParentType::Single)
       .with_state(state.clone())
       .with_child(
-        create_space_row().with_child(build_column1())
-          .with_child(Column::create()
+        create_space_row().with_child(build_column1()).with_child(
+          Column::create()
             .with_child(Container::create().with_child(create_header("Text")))
             .with_child(
               Container::create().with_child(
