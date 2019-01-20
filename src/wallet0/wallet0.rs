@@ -45,6 +45,8 @@ impl Widget for MainView {
 
 // Create a row for buttons and information
 fn build_navbar() -> Template {
+  // let frame = Constraint::default().with_width(400).with_height(80);
+
   Row::create().with_property(Selector::from("row").with_class("full"))
       .with_child(Column::create()
         .with_child(Button::create()
@@ -55,19 +57,14 @@ fn build_navbar() -> Template {
       .with_child(Column::create()
         .with_layout(FixedSizeLayout::default())
         .with_property(Selector::from("column").with_class("navview"))
-
         .with_child(Container::create()
-
-        // .with_property(Selector::from("container").with_class("navbarview"))
-
-        .with_child(Center::create()
-        // .with_property(Bounds::new(0, 0, 400, 80))
-        // .with_property(Selector::from("center").with_class("navtitleview"))
-        // .with_property(Constraint::default().with_width(300).with_height(100))
-        .with_child(TextBlock::create()
-          .with_property(Label::from("TITLE"))
-          .with_property(Selector::from("textblock").with_class("h1")),
-        ))))
+          .with_property(Selector::from("container").with_class("navbarview"))
+          .with_child(Center::create()
+            .with_property(Selector::from("center").with_class("navtitleview"))
+            .with_child(TextBlock::create()
+              .with_property(Label::from("TITLE"))
+              .with_property(Selector::from("textblock").with_class("h1")),
+            ))))
       .with_child(Column::create()
         .with_child(Button::create()
           .with_property(Selector::from("button").with_class("none"))

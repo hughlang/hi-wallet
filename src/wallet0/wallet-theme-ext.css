@@ -14,7 +14,8 @@ column.navview {
 }
 
 container.navbarview {
-	width: 200;
+	width: 400;
+  padding: 7;
 }
 
 center.navtitleview {
@@ -24,6 +25,9 @@ center.navtitleview {
 
 textblock.h1 {
   font-size: 18;
+  width: 100;
+	
+/*	align: center;*/
 }
 
 button, togglebutton {
