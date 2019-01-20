@@ -5,6 +5,27 @@ debugborder {
     background: transparent;
 }
 
-.full {	  
-    width: auto;
+row.full {	  
+    width: 600;
+}
+
+column.navview {
+	width: 400;
+}
+
+container.navbarview {
+	width: 200;
+}
+
+center.navtitleview {
+	width: 400;
+	min-width: 400;
+}
+
+textblock.h1 {
+  font-size: 18;
+}
+
+button, togglebutton {
+    min-width: 100;
 }

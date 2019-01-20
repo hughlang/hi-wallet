@@ -181,7 +181,7 @@ fn main() {
     .with_title("Calculator")
     .with_theme(Theme::parse(&theme))
     .with_root(MainView::create())
-    .with_debug_flag(false)
+    .with_debug_flag(true)
     .build();
   application.run();
 }

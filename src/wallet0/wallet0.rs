@@ -37,7 +37,7 @@ impl Widget for MainView {
       .as_parent_type(ParentType::Single)
       .with_state(state.clone())
       // Nav bar
-      .with_child(build_navbar()) 
+      .with_child(build_navbar())
       .with_shared_property(label)
       .with_debug_name("MainView")
   }
@@ -49,13 +49,29 @@ fn build_navbar() -> Template {
       .with_child(Column::create()
         .with_child(Button::create()
           .with_property(Selector::from("button").with_class("primary"))
-          .with_property(Label::from("Primary")),			
+          .with_property(Label::from("Primary")),
         ),
-      )  
+      )
+      .with_child(Column::create()
+        .with_layout(FixedSizeLayout::default())
+        .with_property(Selector::from("column").with_class("navview"))
+
+        .with_child(Container::create()
+
+        // .with_property(Selector::from("container").with_class("navbarview"))
+
+        .with_child(Center::create()
+        // .with_property(Bounds::new(0, 0, 400, 80))
+        // .with_property(Selector::from("center").with_class("navtitleview"))
+        // .with_property(Constraint::default().with_width(300).with_height(100))
+        .with_child(TextBlock::create()
+          .with_property(Label::from("TITLE"))
+          .with_property(Selector::from("textblock").with_class("h1")),
+        ))))
       .with_child(Column::create()
         .with_child(Button::create()
           .with_property(Selector::from("button").with_class("none"))
-          .with_property(Label::from("Normal")),			
+          .with_property(Label::from("Normal")),
       ),
     )
 }
@@ -65,7 +81,7 @@ fn main() {
   let theme = format!("{}{}", WALLET_THEME_CSS, DEFAULT_THEME_CSS);
   application
     .create_window()
-    .with_bounds(Bounds::new(50, 50, 600, 400))
+    .with_bounds(Bounds::new(100, 200, 600, 400))
     .with_title("Hi Wallet :: wallet0")
     .with_theme(Theme::parse(&theme))
     .with_root(MainView::create())

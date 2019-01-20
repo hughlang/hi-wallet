@@ -69,7 +69,8 @@ fn build_column1() -> Template {
       Container::create().with_child(
         Button::create()
           .with_property(Label::from("Button"))
-          .with_property(FontIcon::from(theme::material_font_icons::CHECK_FONT_ICON))
+          
+          .with_property(FontIcon::from(styling::vector_graphics::material_font_icons::CHECK_FONT_ICON,))
           .with_event_handler(
             MouseEventHandler::default().on_click(Rc::new(move |_pos: Point| -> bool { true })),
           ),
