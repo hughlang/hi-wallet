@@ -23,12 +23,7 @@ path = "src/wallet0/wallet0.rs"
 
 [dependencies]
 calculate = "0.5.1"
-# orbclient = "0.3.20"
-# orbfont = { git = "https://gitlab.redox-os.org/redox-os/orbfont" }
-# orbimage = "0.1"
-# orbtk = { git = "https://gitlab.redox-os.org/redox-os/orbtk" }
 orbtk = { path = "../orbtk" }
-
 
 
 # [patch."https://gitlab.redox-os.org/redox-os/orbtk"]

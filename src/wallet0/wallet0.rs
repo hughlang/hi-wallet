@@ -1,9 +1,8 @@
 extern crate orbtk;
 use orbtk::*;
 use std::{cell::Cell, rc::Rc};
-use wallet::prelude::*;
-
 static WALLET_THEME_CSS: &'static str = include_str!("wallet-theme-ext.css");
+// use wallet::prelude::*;
 
 #[derive(Default)]
 struct MainViewState {
@@ -127,12 +126,14 @@ fn build_account_view() -> Template {
 
 fn main() {
   let mut application = Application::default();
-  let theme = format!("{}{}", WALLET_THEME_CSS, DEFAULT_THEME_CSS);
   application
     .create_window()
     .with_bounds(Bounds::new(100, 200, 600, 400))
     .with_title("Hi Wallet :: wallet0")
-    // .with_theme(Theme::create())
+    .with_theme(Theme::create()
+        .with_extenstion_css(WALLET_THEME_CSS)
+        .build(),
+    )
     .with_root(MainView::create())
     .with_debug_flag(true)
     .build();
