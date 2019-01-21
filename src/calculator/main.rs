@@ -173,13 +173,13 @@ impl Widget for MainView {
 fn main() {
   let mut application = Application::new();
 
-  let theme = format!("{}{}", DARK_THEME_EXTENSION, DEFAULT_THEME_CSS);
+  let _theme = format!("{}{}", DARK_THEME_EXTENSION, DEFAULT_THEME_CSS);
 
   application
     .create_window()
     .with_bounds(Bounds::new(0, 0, 220, 364))
     .with_title("Calculator")
-    .with_theme(Theme::parse(&theme))
+    // .with_theme(Theme::parse(&theme))
     .with_root(MainView::create())
     .with_debug_flag(true)
     .build();
