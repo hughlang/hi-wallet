@@ -4,27 +4,14 @@ version = "0.1.0"
 authors = ["Hugh Lang <hughlang@gmail.com>"]
 edition = "2018"
 
+[[bin]]
+name = "launcher"
+path = "src/main.rs"
+
 [lib]
-name = "wallet"
+name = "hi_wallet"
 path = "src/lib.rs"
 
-[[bin]]
-name = "calculator"
-path = "src/calculator/main.rs"
+# [dependencies]
+# tweek-rust = { path = "../tweek-rust" }
 
-[[bin]]
-name = "prototype"
-path = "src/prototype/main.rs"
-
-[[bin]]
-name = "wallet0"
-path = "src/wallet0/wallet0.rs"
-
-
-[dependencies]
-calculate = "0.5.1"
-orbtk = { path = "../orbtk" }
-
-
-# [patch."https://gitlab.redox-os.org/redox-os/orbtk"]
-# orbtk = { path = "../orbtk" }

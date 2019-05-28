@@ -1,9 +1,4 @@
-use orbtk::enums;
-use orbtk::event;
-use orbtk::properties;
-use orbtk::theme;
-use orbtk::styling;
-use orbtk::widget;
+#![crate_name = "hi_wallet"]
 
-pub mod wallet;
+// pub mod app;
 pub mod prelude;
