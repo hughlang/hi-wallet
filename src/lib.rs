@@ -1,5 +1,5 @@
 #![crate_name = "hi_wallet"]
 
 
-// pub mod app;
+pub mod application;
 pub mod prelude;
