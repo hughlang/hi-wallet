@@ -1,7 +1,7 @@
 use tweek::prelude::*;
 
 #[allow(unused_imports)]
-use tweek::quicksilver::{
+use quicksilver::{
     graphics::{Color, Font, FontStyle},
 };
 

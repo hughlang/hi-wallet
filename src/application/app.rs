@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[allow(unused_imports)]
-use tweek::quicksilver::{
+use quicksilver::{
     geom::{Circle, Line, Rectangle, Scalar, Shape, Transform, Triangle, Vector},
     graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
     lifecycle::{run_with, Asset, Event, Settings, State, Window},

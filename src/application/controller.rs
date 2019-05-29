@@ -2,7 +2,7 @@
 // use crate::prelude::*;
 use tweek::prelude::*;
 
-use tweek::quicksilver::{
+use quicksilver::{
     lifecycle::Window,
 };
 
