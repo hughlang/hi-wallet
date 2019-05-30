@@ -34,7 +34,8 @@ impl Application {
 
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
-        let home = HomeController::new(screen);
+        let mut home = HomeController::new(screen);
+        home.view_will_load();
 
         let s = Application {
             screen,

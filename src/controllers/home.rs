@@ -12,7 +12,7 @@ use quicksilver::{
 };
 
 use tweek::{
-    gui::{Scene, ShapeView, TKDisplayable, Theme},
+    gui::{Button, Scene, ShapeView, TKDisplayable, Theme},
     shared::DrawShape,
 };
 
@@ -35,21 +35,32 @@ impl HomeController {
         let shape = ShapeView::new(frame).with_mesh(&mut mesh);
         scene.views.push(Rc::new(RefCell::new(shape)));
 
-        let mut navbar = NavBar::new((screen.x, screen.y));
-        navbar.layout_views();
+        let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
+        let navbar = NavBar::new(&frame);
         Self { scene, navbar }
     }
 }
 
 impl Controller for HomeController {
+
+    fn view_will_load(&mut self) {
+        self.navbar.color = Some(Color::RED);
+        self.navbar.set_title("Home");
+        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
+        self.navbar.set_left_button(btn);
+        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
+        self.navbar.set_right_button(btn);
+        self.navbar.layout_views();
+    }
+
     fn update(&mut self, window: &mut Window) {
         let _ = self.scene.update(window);
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
+        self.navbar.render_views(theme, window);
         let _ = self.scene.render(theme, window);
         self.navbar.render_views(theme, window);
     }
 
-    fn view_will_load(&mut self) {}
 }
