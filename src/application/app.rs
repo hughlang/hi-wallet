@@ -5,11 +5,12 @@ use tweek::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[allow(unused_imports)]
+// #[allow(unused_imports)]
 use quicksilver::{
-    geom::{Circle, Line, Rectangle, Scalar, Shape, Transform, Triangle, Vector},
-    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
-    lifecycle::{run_with, Asset, Event, Settings, State, Window},
+    geom::Vector,
+    graphics::Color,
+    input::{ButtonState, Key, MouseButton, MouseCursor},
+    lifecycle::{Event, State, Window},
     Error, Result,
 };
 
@@ -62,12 +63,50 @@ impl State for Application {
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         // Repaint the entire screen
         window.clear(Color::WHITE)?;
-
+        // Nav controller rendering: If top view controller is a navcontroller,
+        // render its subviews
         if let Some(cell) = &mut self.main_controller {
             let mut controller = cell.borrow_mut();
             (&mut *controller).render(&mut self.theme, window);
         }
         Ok(())
     }
-}
 
+    #[allow(unused_assignments)]
+    fn event(&mut self, event: &Event, window: &mut Window) -> Result<()> {
+        match event {
+            Event::Focused => {
+                log::debug!("size={:?} y={:?}", window.screen_size(), 0);
+            }
+            Event::MouseMoved(pt) => {
+
+                // hover = self.scene.handle_mouse_at(pt);
+                // if hover {
+                //     window.set_cursor(MouseCursor::Hand);
+                // } else {
+                //     window.set_cursor(MouseCursor::Default);
+                // }
+            }
+            Event::MouseButton(MouseButton::Left, ButtonState::Pressed) => {
+                // self.scene.handle_mouse_down(&window.mouse().pos(), &mut self.tk_state);
+            }
+            Event::MouseButton(MouseButton::Left, ButtonState::Released) => {}
+            Event::MouseWheel(xy) => {
+                // self.scene.handle_mouse_scroll(xy, &mut self.tk_state);
+            }
+            Event::Key(key, ButtonState::Pressed) => match key {
+                Key::Escape => {
+                    window.close();
+                }
+                _ => {
+                    // self.scene.handle_key_command(key, window);
+                }
+            },
+            Event::Typed(c) => {
+                // self.scene.handle_key_press(*c, window);
+            }
+            _ => {}
+        };
+        Ok(())
+    }
+}

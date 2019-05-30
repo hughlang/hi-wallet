@@ -1,16 +1,12 @@
 use tweek::prelude::*;
 
 #[allow(unused_imports)]
-use quicksilver::{
-    graphics::{Color, Font, FontStyle},
-};
+use quicksilver::graphics::{Color, Font, FontStyle};
 
 static ROBOTO_REGULAR: &[u8] = include_bytes!("../../static/Roboto-Regular.ttf");
 static ROBOTO_BOLD: &[u8] = include_bytes!("../../static/Roboto-Bold.ttf");
 
-pub struct ThemeManager {
-
-}
+pub struct ThemeManager {}
 
 impl ThemeManager {
     pub fn default_theme() -> Theme {

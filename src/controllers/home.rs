@@ -12,12 +12,13 @@ use quicksilver::{
 };
 
 use tweek::{
-    gui::{Scene, ShapeView, Theme, TKDisplayable},
-    shared::{DrawShape},
+    gui::{Scene, ShapeView, TKDisplayable, Theme},
+    shared::DrawShape,
 };
 
 pub struct HomeController {
     scene: Scene,
+    navbar: NavBar,
 }
 
 impl HomeController {
@@ -34,24 +35,21 @@ impl HomeController {
         let shape = ShapeView::new(frame).with_mesh(&mut mesh);
         scene.views.push(Rc::new(RefCell::new(shape)));
 
-        Self {
-            scene
-        }
+        let mut navbar = NavBar::new((screen.x, screen.y));
+        navbar.layout_views();
+        Self { scene, navbar }
     }
 }
 
 impl Controller for HomeController {
-
     fn update(&mut self, window: &mut Window) {
         let _ = self.scene.update(window);
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
         let _ = self.scene.render(theme, window);
+        self.navbar.render_views(theme, window);
     }
 
-    fn view_will_load(&mut self) {
-
-    }
-
+    fn view_will_load(&mut self) {}
 }

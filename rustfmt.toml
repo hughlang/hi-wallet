@@ -1,1 +1,7 @@
-tab_spaces = 2
+format_strings = false
+reorder_imports = true
+reorder_modules = true
+# report_todo = "Always"
+# report_fixme = "Always"
+use_small_heuristics = "Max"
+max_width = 120

@@ -12,6 +12,10 @@ path = "src/main.rs"
 name = "hi_wallet"
 path = "src/lib.rs"
 
+[dependencies]
+log = "0.4"
+stretch = "0.2.2"
+
 [dependencies.tweek]
 path = "../tweek-rust"
 
