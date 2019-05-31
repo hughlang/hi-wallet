@@ -1,4 +1,5 @@
 use super::*;
+use crate::utils::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -8,7 +9,13 @@ use quicksilver::{
     graphics::{Background::Col, Color},
     lifecycle::Window
 };
-use stretch::{geometry::Size, node::Node, result::Layout, style::*};
+use stretch::{
+    geometry::*,
+    node::Node,
+    result::Layout,
+    style::*
+};
+
 use tweek::gui::*;
 
 pub struct NavController {
@@ -67,6 +74,15 @@ impl NavBar {
     /// only one node leaf is defined in each. Others could be added later.
     /// See: https://vislyhq.github.io/stretch/docs/rust/
     pub fn layout_views(&mut self) {
+
+        let cell_padding = Rect {
+            start: Dimension::Points(5.0),
+            end: Dimension::Points(5.0),
+            top: Dimension::Points(5.0),
+            bottom: Dimension::Points(5.0),
+            ..Default::default()
+        };
+
         let node = Node::new(
             Style {
                 size: Size { width: Dimension::Points(self.frame.size.x), height: Dimension::Points(50.0) },
@@ -77,6 +93,8 @@ impl NavBar {
                     Style {
                         size: Size { width: Dimension::Percent(0.2), height: Dimension::Auto },
                         justify_content: JustifyContent::FlexStart,
+                        align_items: AlignItems::Center,
+                        padding: cell_padding,
                         ..Default::default()
                     },
                     vec![],
@@ -85,6 +103,8 @@ impl NavBar {
                     Style {
                         size: Size { width: Dimension::Percent(0.6), height: Dimension::Auto },
                         justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        padding: cell_padding,
                         ..Default::default()
                     },
                     vec![],
@@ -93,6 +113,8 @@ impl NavBar {
                     Style {
                         size: Size { width: Dimension::Percent(0.2), height: Dimension::Auto },
                         justify_content: JustifyContent::FlexEnd,
+                        align_items: AlignItems::Center,
+                        padding: cell_padding,
                         ..Default::default()
                     },
                     vec![],
@@ -106,6 +128,7 @@ impl NavBar {
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
             node.children()[0].add_child(&leaf);
         }
+
         if let Some(button) = &self.right_button {
             let size = button.get_content_size();
             let node_size = Size { width: size.x, height: size.y };
@@ -122,10 +145,37 @@ impl NavBar {
 
         let layout = node.compute_layout(Size::undefined()).unwrap();
         eprintln!("{:#?}", layout);
+        // let loc = node.children()[0].location;
+        let loc = layout.children[0].children[0].location;
+        eprintln!("location={:?}", loc);
+
+        let pos = self.absolute_position(&layout, vec![0, 0]);
+        eprintln!("Abs position={:?}", pos);
+
+        let mut solver = LayoutSolver {};
+        let node_layout = solver.absolute_layout(&layout);
 
         self.layout = Some(layout);
     }
+
+    fn absolute_position(&self, layout: &Layout, path: Vec<usize>) -> Point<f32> {
+        let mut position = Point { x: 0.0, y: 0.0 };
+        let mut current = layout.clone();
+
+        for i in path {
+            if i < current.children.len() {
+                current = current.children[i].clone();
+                let location = current.location;
+                position = Point { x: position.x + location.x, y: position.y + location.y };
+            } else {
+                return position;
+            }
+        }
+        position
+    }
 }
+
+
 
 impl Container for NavBar {
     fn render_views(&mut self, theme: &mut Theme, window: &mut Window) {
