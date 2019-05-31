@@ -42,23 +42,23 @@ impl LayoutSolver {
             children: Vec::new(),
         };
         self.copy_layout(layout, &mut result);
-        println!("==========================================================");
-        eprintln!("len={:?} node_layout={:?}", result.children.len(), result);
         result
     }
 
     pub fn copy_layout(&self, layout: &Layout, result: &mut NodeLayout) {
         for (i, child) in layout.children.iter().enumerate() {
-            let item = NodeLayout {
+            // let loc = child.location;
+            let pos = Point { x: result.location.x + child.location.x, y: result.location.y + child.location.y };
+            let mut item = NodeLayout {
                 id: i as u32,
                 size: child.size.clone(),
-                location: child.location.clone(),
+                location: pos,
                 children: Vec::new(),
             };
-            result.children.push(item);
             if child.children.len() > 0 {
-                self.copy_layout(&child, result);
+                self.copy_layout(&child, &mut item);
             }
+            result.children.push(item);
         }
     }
 

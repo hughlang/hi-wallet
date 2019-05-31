@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use quicksilver::{
-    geom::{Rectangle},
+    geom::{Rectangle, Vector},
     graphics::{Background::Col, Color},
     lifecycle::Window
 };
@@ -144,34 +144,25 @@ impl NavBar {
         }
 
         let layout = node.compute_layout(Size::undefined()).unwrap();
-        eprintln!("{:#?}", layout);
-        // let loc = node.children()[0].location;
-        let loc = layout.children[0].children[0].location;
-        eprintln!("location={:?}", loc);
 
-        let pos = self.absolute_position(&layout, vec![0, 0]);
-        eprintln!("Abs position={:?}", pos);
+        let solver = LayoutSolver {};
+        let abs_layout = solver.absolute_layout(&layout);
+        eprintln!("node_layout={:#?}", abs_layout);
 
-        let mut solver = LayoutSolver {};
-        let node_layout = solver.absolute_layout(&layout);
+        println!("==========================================================");
+        if let Some(button) = &mut self.left_button {
+            let item = &abs_layout.children[0].children[0];
+            eprintln!("left={:?}", item.location);
+            button.set_origin(&Vector::new(item.location.x, item.location.y));
+        }
+
+        if let Some(button) = &mut self.right_button {
+            let item = &abs_layout.children[2].children[0];
+            eprintln!("right={:?}", item.location);
+            button.set_origin(&Vector::new(item.location.x, item.location.y));
+        }
 
         self.layout = Some(layout);
-    }
-
-    fn absolute_position(&self, layout: &Layout, path: Vec<usize>) -> Point<f32> {
-        let mut position = Point { x: 0.0, y: 0.0 };
-        let mut current = layout.clone();
-
-        for i in path {
-            if i < current.children.len() {
-                current = current.children[i].clone();
-                let location = current.location;
-                position = Point { x: position.x + location.x, y: position.y + location.y };
-            } else {
-                return position;
-            }
-        }
-        position
     }
 }
 
