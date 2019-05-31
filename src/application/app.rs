@@ -25,6 +25,7 @@ pub struct AppState {
 pub struct Application {
     screen: Vector,
     theme: Theme,
+    tk_state: TKState,
     main_controller: Option<Rc<RefCell<Controller>>>,
 }
 
@@ -40,6 +41,7 @@ impl Application {
         let s = Application {
             screen,
             theme: ThemeManager::default_theme(),
+            tk_state: TKState::new(),
             main_controller: Some(Rc::new(RefCell::new(home))),
         };
         Ok(s)
@@ -67,8 +69,7 @@ impl State for Application {
         // Nav controller rendering: If top view controller is a navcontroller,
         // render its subviews
         if let Some(cell) = &mut self.main_controller {
-            let mut controller = cell.borrow_mut();
-            (&mut *controller).render(&mut self.theme, window);
+            (cell.borrow_mut()).render(&mut self.theme, window);
         }
         Ok(())
     }
@@ -80,18 +81,25 @@ impl State for Application {
                 log::debug!("size={:?} y={:?}", window.screen_size(), 0);
             }
             Event::MouseMoved(pt) => {
-
-                // hover = self.scene.handle_mouse_at(pt);
-                // if hover {
-                //     window.set_cursor(MouseCursor::Hand);
-                // } else {
-                //     window.set_cursor(MouseCursor::Default);
-                // }
+                if let Some(cell) = &mut self.main_controller {
+                    let hover = (cell.borrow_mut()).handle_mouse_at(pt);
+                    if hover {
+                        window.set_cursor(MouseCursor::Hand);
+                    } else {
+                        window.set_cursor(MouseCursor::Default);
+                    }
+                }
             }
             Event::MouseButton(MouseButton::Left, ButtonState::Pressed) => {
-                // self.scene.handle_mouse_down(&window.mouse().pos(), &mut self.tk_state);
+                if let Some(cell) = &mut self.main_controller {
+                    (cell.borrow_mut()).handle_mouse_down(&window.mouse().pos(), &mut self.tk_state);
+                }
             }
-            Event::MouseButton(MouseButton::Left, ButtonState::Released) => {}
+            Event::MouseButton(MouseButton::Left, ButtonState::Released) => {
+                if let Some(cell) = &mut self.main_controller {
+                    (cell.borrow_mut()).handle_mouse_up(&window.mouse().pos(), &mut self.tk_state);
+                }
+            }
             Event::MouseWheel(xy) => {
                 // self.scene.handle_mouse_scroll(xy, &mut self.tk_state);
             }
