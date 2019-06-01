@@ -34,6 +34,8 @@ pub struct LayoutSolver {
 
 impl LayoutSolver {
 
+    /// A helper method to convert a Layout constructed by Stretch to absolute xy coords.
+    /// Additional features may be added in the future
     pub fn absolute_layout(&self, layout: &Layout) -> NodeLayout {
         let mut result = NodeLayout {
             id: 0,
@@ -47,7 +49,6 @@ impl LayoutSolver {
 
     pub fn copy_layout(&self, layout: &Layout, result: &mut NodeLayout) {
         for (i, child) in layout.children.iter().enumerate() {
-            // let loc = child.location;
             let pos = Point { x: result.location.x + child.location.x, y: result.location.y + child.location.y };
             let mut item = NodeLayout {
                 id: i as u32,

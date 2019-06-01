@@ -65,7 +65,7 @@ impl State for Application {
 
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         // Repaint the entire screen
-        window.clear(Color::WHITE)?;
+        window.clear(Color::from_hex("#EEEEEE"))?;
         // Nav controller rendering: If top view controller is a navcontroller,
         // render its subviews
         if let Some(cell) = &mut self.main_controller {
@@ -100,7 +100,7 @@ impl State for Application {
                     (cell.borrow_mut()).handle_mouse_up(&window.mouse().pos(), &mut self.tk_state);
                 }
             }
-            Event::MouseWheel(xy) => {
+            Event::MouseWheel(_xy) => {
                 // self.scene.handle_mouse_scroll(xy, &mut self.tk_state);
             }
             Event::Key(key, ButtonState::Pressed) => match key {

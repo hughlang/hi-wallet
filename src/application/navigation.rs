@@ -6,8 +6,7 @@ use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
-    graphics::{Background::Col, Color},
-    lifecycle::Window
+    graphics::{Color},
 };
 use stretch::{
     geometry::*,
@@ -16,7 +15,10 @@ use stretch::{
     style::*
 };
 
-use tweek::gui::*;
+use tweek::{
+    gui::*,
+    shared::DrawShape,
+};
 
 pub struct NavController {
     // navbar: NavBar,
@@ -37,37 +39,62 @@ impl NavController {
 /// toolbar-style nav bars which have collections of buttons (like in Material Design)
 pub struct NavBar {
     pub frame: Rectangle,
+    pub scene: Scene,
     pub color: Option<Color>,
-    pub title_label: Option<Label>,
-    pub left_button: Option<Button>,
-    pub right_button: Option<Button>,
+    title_ptr: Option<usize>,
+    left_btn_id: Option<usize>, // todo: make these a vec of usize IDs to allow multiple buttons
+    right_btn_id: Option<usize>,
     layout: Option<Layout>,
 }
 
 impl NavBar {
     pub fn new(frame: &Rectangle) -> Self {
+        let mut scene = Scene::new(frame);
+
+        // let fill_color = Color::RED;
+        // let mut bg = DrawShape::rectangle(&frame, Some(fill_color), None, 0.0, 0.0);
+        // let shape = ShapeView::new(frame.clone()).with_mesh(&mut bg);
+        // scene.views.push(Rc::new(RefCell::new(shape)));
+
         NavBar {
             frame: frame.clone(),
+            scene,
             color: None,
-            title_label: None,
-            left_button: None,
-            right_button: None,
+            title_ptr: None,
+            left_btn_id: None,
+            right_btn_id: None,
             layout: None
-            }
+        }
     }
 
     pub fn set_title(&mut self, title: &str) {
-        // Create the label without position and size information. This gets done later.
         let label = Label::new(&self.frame, title);
-        self.title_label = Some(label);
+        if let Some(idx) = &self.title_ptr {
+            self.scene.views[*idx] = Rc::new(RefCell::new(label));
+        } else {
+            self.scene.views.push(Rc::new(RefCell::new(label)));
+            self.title_ptr = Some(self.scene.views.len() - 1);
+        }
     }
 
+    /// TODO: make it Option<Button> where None means remove the current button
     pub fn set_left_button(&mut self, button: Button) {
-        self.left_button = Some(button);
+        if let Some(idx) = &self.left_btn_id {
+            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
+        } else {
+            self.scene.controls.push(Rc::new(RefCell::new(button)));
+            self.left_btn_id = Some(self.scene.controls.len() - 1);
+        }
     }
 
+    /// TODO: make it Option<Button> where None means remove the current button
     pub fn set_right_button(&mut self, button: Button) {
-        self.right_button = Some(button);
+        if let Some(idx) = &self.right_btn_id {
+            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
+        } else {
+            self.scene.controls.push(Rc::new(RefCell::new(button)));
+            self.right_btn_id = Some(self.scene.controls.len() - 1);
+        }
     }
 
     /// This layout defines a % split of 20-60-20 for the 3 sections. Each section has children nodes and
@@ -76,8 +103,8 @@ impl NavBar {
     pub fn layout_views(&mut self) {
 
         let cell_padding = Rect {
-            start: Dimension::Points(5.0),
-            end: Dimension::Points(5.0),
+            start: Dimension::Points(8.0),
+            end: Dimension::Points(8.0),
             top: Dimension::Points(5.0),
             bottom: Dimension::Points(5.0),
             ..Default::default()
@@ -122,25 +149,26 @@ impl NavBar {
             ],
         );
 
-        if let Some(button) = &self.left_button {
-            let size = button.get_content_size();
+        if let Some(idx) = &self.left_btn_id {
+            let cell = &mut self.scene.controls[*idx];
+            let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
             node.children()[0].add_child(&leaf);
         }
-
-        if let Some(button) = &self.right_button {
-            let size = button.get_content_size();
+        if let Some(idx) = &self.right_btn_id {
+            let cell = &mut self.scene.controls[*idx];
+            let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
             node.children()[2].add_child(&leaf);
         }
-
-        if let Some(title) = &self.title_label {
-            let size = title.get_content_size();
+        if let Some(idx) = &self.title_ptr {
+            let cell = &mut self.scene.views[*idx];
+            let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
-            let center = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[1].add_child(&center);
+            let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
+            node.children()[1].add_child(&leaf);
         }
 
         let layout = node.compute_layout(Size::undefined()).unwrap();
@@ -149,131 +177,20 @@ impl NavBar {
         let abs_layout = solver.absolute_layout(&layout);
         eprintln!("node_layout={:#?}", abs_layout);
 
-        println!("==========================================================");
-        if let Some(button) = &mut self.left_button {
+        if let Some(idx) = &self.left_btn_id {
             let item = &abs_layout.children[0].children[0];
-            eprintln!("left={:?}", item.location);
-            button.set_origin(&Vector::new(item.location.x, item.location.y));
+            eprintln!("{} left={:?}", idx, item.location);
+            let cell = &mut self.scene.controls[*idx];
+            (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
         }
-
-        if let Some(button) = &mut self.right_button {
+        if let Some(idx) = &self.right_btn_id {
             let item = &abs_layout.children[2].children[0];
-            eprintln!("right={:?}", item.location);
-            button.set_origin(&Vector::new(item.location.x, item.location.y));
+            eprintln!("{} right={:?}", idx, item.location);
+            let cell = &mut self.scene.controls[*idx];
+            (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
         }
 
         self.layout = Some(layout);
     }
 }
 
-
-
-impl Container for NavBar {
-    fn render_views(&mut self, theme: &mut Theme, window: &mut Window) {
-        if let Some(color) = &mut self.color {
-            window.draw(&self.frame, Col(*color));
-        }
-
-        if let Some(title) = &mut self.title_label {
-            let _ = title.render(theme, window);
-        }
-        if let Some(button) = &mut self.left_button {
-            let _ = button.render(theme, window);
-        }
-        if let Some(button) = &mut self.right_button {
-            let _ = button.render(theme, window);
-        }
-    }
-
-}
-
-/*
-Layout {
-    order: 0,
-    size: Size {
-        width: 400.0,
-        height: 50.0,
-    },
-    location: Point {
-        x: 0.0,
-        y: 0.0,
-    },
-    children: [
-        Layout {
-            order: 0,
-            size: Size {
-                width: 80.0,
-                height: 50.0,
-            },
-            location: Point {
-                x: 0.0,
-                y: 0.0,
-            },
-            children: [
-                Layout {
-                    order: 0,
-                    size: Size {
-                        width: 40.0,
-                        height: 50.0,
-                    },
-                    location: Point {
-                        x: 0.0,
-                        y: 0.0,
-                    },
-                    children: [],
-                },
-            ],
-        },
-        Layout {
-            order: 1,
-            size: Size {
-                width: 240.0,
-                height: 50.0,
-            },
-            location: Point {
-                x: 80.0,
-                y: 0.0,
-            },
-            children: [
-                Layout {
-                    order: 0,
-                    size: Size {
-                        width: 0.0,
-                        height: 50.0,
-                    },
-                    location: Point {
-                        x: 120.0,
-                        y: 0.0,
-                    },
-                    children: [],
-                },
-            ],
-        },
-        Layout {
-            order: 2,
-            size: Size {
-                width: 80.0,
-                height: 50.0,
-            },
-            location: Point {
-                x: 320.0,
-                y: 0.0,
-            },
-            children: [
-                Layout {
-                    order: 0,
-                    size: Size {
-                        width: 40.0,
-                        height: 50.0,
-                    },
-                    location: Point {
-                        x: 40.0,
-                        y: 0.0,
-                    },
-                    children: [],
-                },
-            ],
-        },
-    ],
-}
- */

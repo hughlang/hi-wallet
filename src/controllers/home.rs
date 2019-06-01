@@ -41,18 +41,18 @@ impl HomeController {
             scene,
             navbar,
             is_active: true,
-            }
+        }
     }
 
-    fn do_action(&mut self) {
+    // fn do_action(&mut self) {
 
-    }
+    // }
 }
 
 impl Controller for HomeController {
 
     fn view_will_load(&mut self) {
-        self.navbar.color = Some(Color::RED);
+        // self.navbar.color = Some(Color::YELLOW);
         self.navbar.set_title("Home");
         let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
         btn.set_onclick(move |_action, tk| {
@@ -74,19 +74,22 @@ impl Controller for HomeController {
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
-        self.navbar.render_views(theme, window);
         let _ = self.scene.render(theme, window);
+        let _ = self.navbar.scene.render(theme, window);
     }
 
     fn handle_mouse_at(&mut self, pt: &Vector) -> bool {
+        self.navbar.scene.handle_mouse_at(pt);
         self.scene.handle_mouse_at(pt)
     }
 
     fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
+        self.navbar.scene.handle_mouse_down(pt, state);
         self.scene.handle_mouse_down(pt, state)
     }
 
     fn handle_mouse_up(&mut self, pt: &Vector, state: &mut TKState) -> bool {
+        self.navbar.scene.handle_mouse_up(pt, state);
         self.scene.handle_mouse_up(pt, state)
     }
 
