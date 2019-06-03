@@ -20,7 +20,6 @@ use tweek::{
 pub struct HomeController {
     scene: Scene,
     navbar: NavBar,
-    events: Rc<RefCell<EventQueue>>,
 }
 
 impl HomeController {
@@ -37,11 +36,9 @@ impl HomeController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         let navbar = NavBar::new(&frame);
 
-        let events = Rc::new(RefCell::new(EventQueue::new()));
         Self {
             scene,
             navbar,
-            events,
         }
     }
 
@@ -56,14 +53,18 @@ impl Controller for HomeController {
         self.navbar.color = Some(Color::RED);
         self.navbar.set_title("Home");
         let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
-        let events = self.events.clone();
+        // let events = self.events.clone();
         btn.set_onclick(move |_action, _tk| {
             // tk.click_target = Some(1);
             let mut notifier = Notifier::new();
-            let queue = events.borrow_mut();
-            notifier.register(move |event| queue.store(event));
+            let rc = EventQueue::new();
+            rc.borrow_mut().register_to(&mut notifier);
+            // notifier.notify(3);
+            // let queue = events.borrow_mut();
+            // notifier.register(move |event| queue.store(event));
             let evt = Event::new(Action::Click(42));
             notifier.notify(evt);
+
         });
 
         self.navbar.set_left_button(btn);
@@ -99,6 +100,7 @@ impl Controller for HomeController {
 
 impl<HomeController: FnMut(Event)> EventListener for HomeController {
     fn on_event(&self, event: Event) {
-        self(event);
+        eprintln!("event={:?}", event);
+        // self(event);
     }
 }

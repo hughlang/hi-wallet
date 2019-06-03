@@ -1,5 +1,10 @@
 /// This events system follows the design pattern described here:
 /// https://blog.rom1v.com/2017/09/gnirehtet-rewritten-in-rust/#observer
+/// In this code, the Storage struct is called EventQueue
+
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
 
 pub trait EventListener {
     fn on_event(&self, event: Event);
@@ -29,10 +34,12 @@ impl Notifier {
 // Model objects for passing around event info
 // *****************************************************************************************************
 
+#[derive(Debug, Clone, Copy)]
 pub enum Action {
     Click(u32),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Event {
     pub action: Action,
 }
@@ -44,18 +51,29 @@ impl Event {
 }
 
 pub struct EventQueue {
-    pub events: Vec<Event>
+    weak_self: Weak<RefCell<EventQueue>>,
+    events: Vec<Event>,
 }
 
 impl EventQueue {
-    pub fn new() -> Self {
-        EventQueue {
-            events: Vec::new()
-        }
+    pub fn new() -> Rc<RefCell<Self>> {
+        let rc = Rc::new(RefCell::new(Self {
+            weak_self: Weak::new(), // initialize empty
+            events: Vec::new(),
+        }));
+        // set weak_self once we get the Rc instance
+        rc.borrow_mut().weak_self = Rc::downgrade(&rc);
+        rc
+    }
+
+    pub fn register_to(&mut self, notifier: &mut Notifier) {
+        let rc = self.weak_self.upgrade().unwrap();
+        notifier.register(move |event| rc.borrow_mut().store(event))
     }
 
     pub fn store(&mut self, evt: Event) {
         self.events.push(evt);
+        eprintln!("events count={:?}", self.events().len());
     }
 
     pub fn events(&self) -> &Vec<Event> {
