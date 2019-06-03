@@ -7,7 +7,7 @@ use std::rc::{Rc, Weak};
 
 
 pub trait EventListener {
-    fn on_event(&self, event: Event);
+    fn on_event(&mut self, event: Event);
 }
 
 pub struct Notifier {
@@ -23,8 +23,8 @@ impl Notifier {
         self.listeners.push(Box::new(listener));
     }
 
-    pub fn notify(&self, event: Event) {
-        for listener in &self.listeners {
+    pub fn notify(&mut self, event: Event) {
+        for listener in &mut self.listeners {
             listener.on_event(event);
         }
     }
@@ -68,7 +68,9 @@ impl EventQueue {
 
     pub fn register_to(&mut self, notifier: &mut Notifier) {
         let rc = self.weak_self.upgrade().unwrap();
-        notifier.register(move |event| rc.borrow_mut().store(event))
+        notifier.register(move |event| {
+            eprintln!("register_to event={:?}", event);
+            rc.borrow_mut().store(event) })
     }
 
     pub fn store(&mut self, evt: Event) {

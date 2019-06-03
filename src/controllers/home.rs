@@ -52,24 +52,27 @@ impl Controller for HomeController {
     fn view_will_load(&mut self) {
         self.navbar.color = Some(Color::RED);
         self.navbar.set_title("Home");
+
         let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
-        // let events = self.events.clone();
         btn.set_onclick(move |_action, _tk| {
-            // tk.click_target = Some(1);
             let mut notifier = Notifier::new();
             let rc = EventQueue::new();
             rc.borrow_mut().register_to(&mut notifier);
-            // notifier.notify(3);
-            // let queue = events.borrow_mut();
-            // notifier.register(move |event| queue.store(event));
             let evt = Event::new(Action::Click(42));
             notifier.notify(evt);
-
         });
-
         self.navbar.set_left_button(btn);
-        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
+
+        let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
+        btn.set_onclick(move |_action, _tk| {
+            let mut notifier = Notifier::new();
+            let rc = EventQueue::new();
+            rc.borrow_mut().register_to(&mut notifier);
+            let evt = Event::new(Action::Click(43));
+            notifier.notify(evt);
+        });
         self.navbar.set_right_button(btn);
+
         self.navbar.layout_views();
     }
 
@@ -99,8 +102,8 @@ impl Controller for HomeController {
 }
 
 impl<HomeController: FnMut(Event)> EventListener for HomeController {
-    fn on_event(&self, event: Event) {
+    fn on_event(&mut self, event: Event) {
         eprintln!("event={:?}", event);
-        // self(event);
+        self(event);
     }
 }
