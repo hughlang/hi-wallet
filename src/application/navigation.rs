@@ -6,7 +6,8 @@ use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
-    graphics::{Color},
+    graphics::{Background::Col, Color},
+    lifecycle::Window
 };
 use stretch::{
     geometry::*,
@@ -17,7 +18,6 @@ use stretch::{
 
 use tweek::{
     gui::*,
-    shared::DrawShape,
 };
 
 pub struct NavController {
@@ -49,12 +49,7 @@ pub struct NavBar {
 
 impl NavBar {
     pub fn new(frame: &Rectangle) -> Self {
-        let mut scene = Scene::new(frame);
-
-        // let fill_color = Color::RED;
-        // let mut bg = DrawShape::rectangle(&frame, Some(fill_color), None, 0.0, 0.0);
-        // let shape = ShapeView::new(frame.clone()).with_mesh(&mut bg);
-        // scene.views.push(Rc::new(RefCell::new(shape)));
+        let scene = Scene::new(frame);
 
         NavBar {
             frame: frame.clone(),
@@ -191,6 +186,14 @@ impl NavBar {
         }
 
         self.layout = Some(layout);
+    }
+
+    /// First renders the background and then the scene content
+    pub fn render(&mut self, theme: &mut Theme, window: &mut Window) {
+        if let Some(color) = &self.color {
+            window.draw(&self.frame, Col(*color));
+        }
+        self.scene.render(theme, window);
     }
 }
 

@@ -39,12 +39,10 @@ pub trait Controller {
     fn view_will_load(&mut self) {}
 }
 
+// UNUSED
 pub trait Container {
     fn render_views(&mut self, theme: &mut Theme, window: &mut Window);
     fn handle_mouse_down(&mut self, _pt: Vector) {}
     fn handle_mouse_up(&mut self, _pt: Vector) {}
 }
 
-pub trait UserEvent {
-    fn on_click(&mut self, _id: u32) {}
-}
