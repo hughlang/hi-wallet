@@ -61,6 +61,7 @@ impl Event {
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
     delegate: Weak<Rc<RefCell<dyn EventDelegate>>>,
+    handlers: Vec<Rc<RefCell<EventDelegate>>>,
     handler: Weak<RefCell<EventHandler>>,
     events: Vec<Event>,
 }
@@ -70,6 +71,7 @@ impl EventQueue {
         let rc = Rc::new(RefCell::new(Self {
             weak_self: Weak::new(), // initialize empty
             delegate: Weak::new(),
+            handlers: Vec::new(),
             handler: Weak::new(),
             events: Vec::new(),
         }));
@@ -83,6 +85,10 @@ impl EventQueue {
 
     pub fn set_delegate(&mut self, delegate: Rc<RefCell<EventDelegate>>) {
         self.delegate = Rc::downgrade(&Rc::new(delegate));
+    }
+
+    pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
+        self.handlers.push(handler);
     }
 
     pub fn set_handler(&mut self, handler: RefCell<EventHandler>) {
@@ -100,13 +106,13 @@ impl EventQueue {
     pub fn store(&mut self, evt: Event) {
         self.events.push(evt);
         eprintln!("events count={:?}", self.events.len());
-        if let Some(delegate) = self.delegate.upgrade() {
-            delegate.borrow_mut().handle_event(evt.clone());
-        }
+        // if let Some(delegate) = self.delegate.upgrade() {
+        //     delegate.borrow_mut().handle_event(evt.clone());
+        // }
     }
 
-    pub fn queue(&mut self) -> &Vec<Event> {
-        &self.events
+    pub fn queue(&mut self) -> &mut Vec<Event> {
+        &mut self.events
     }
 }
 

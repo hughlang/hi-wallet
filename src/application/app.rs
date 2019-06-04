@@ -26,6 +26,7 @@ pub struct Application {
     screen: Vector,
     theme: Theme,
     tk_state: TKState,
+    // nav_controller: NavController,
     front_controller: Option<Rc<RefCell<Controller>>>,
 }
 
@@ -36,7 +37,7 @@ impl Application {
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
         let mut nav = NavController::new(screen);
-        let mut home = HomeController::new(screen);
+        let home = HomeController::new(screen, None);
         nav.show(Rc::new(RefCell::new(home)));
         nav.view_will_load();
 
@@ -44,6 +45,7 @@ impl Application {
             screen,
             theme: ThemeManager::default_theme(),
             tk_state: TKState::new(),
+            // nav_controller: nav,
             front_controller: Some(Rc::new(RefCell::new(nav))),
         };
         Ok(s)

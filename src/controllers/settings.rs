@@ -2,7 +2,7 @@ use super::*;
 use crate::application::*;
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -16,40 +16,34 @@ use tweek::{
     shared::DrawShape,
 };
 
-pub struct HomeController<'a> {
+pub struct SettingsController {
     scene: Scene,
-    nav: Weak<RefCell<&'a NavController>>,
+    // navbar: NavBar,
     events: Rc<RefCell<EventQueue>>,
 }
 
-impl<'a> HomeController<'a> {
-    pub fn new(screen: Vector, nav: Option<&NavController>) -> HomeController {
+impl SettingsController {
+    pub fn new(screen: Vector) -> SettingsController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
         let mut scene = Scene::new(&frame);
 
         let frame = Rectangle::new((10.0, 70.0), (screen.x - 20.0, screen.y - 90.0));
-        let line_color = Color::from_hex("#CCCCCC");
+        let line_color = Color::from_hex("#CD5C5C");
         let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 1.0, 0.0);
         let shape = ShapeView::new(frame).with_mesh(&mut mesh);
         scene.views.push(Rc::new(RefCell::new(shape)));
 
         // let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         // let navbar = NavBar::new(&frame);
-
-        let mut controller = HomeController {
+        SettingsController {
             scene,
-            nav: Weak::new(),
+            // navbar,
             events: EventQueue::new(),
-        };
-        if let Some(nav) = nav {
-            let rc = Rc::new(RefCell::new(nav));
-            controller.nav = Rc::downgrade(&rc);
         }
-        controller
     }
 }
 
-impl<'a> Controller for HomeController<'a> {
+impl Controller for SettingsController {
 
     fn update(&mut self, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();

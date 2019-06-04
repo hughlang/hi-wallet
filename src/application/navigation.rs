@@ -59,6 +59,8 @@ impl NavController {
 
 impl Controller for NavController {
     fn view_will_load(&mut self) {
+        // let rc = Rc::new(RefCell::new(self));
+        // self.events.borrow_mut().add_handler(rc);
 
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);
@@ -81,6 +83,9 @@ impl Controller for NavController {
             events.borrow().register_to(&mut notifier);
             let evt = Event::new(Action::Click(NEXT_BUTTON));
             notifier.notify(evt);
+
+            // Ideally, this callback would directly execute a navigation action like this:
+            // navcontroller get target controller and show it
         });
         self.navbar.set_right_button(btn);
 
@@ -92,16 +97,18 @@ impl Controller for NavController {
     }
 
     fn update(&mut self, window: &mut Window) {
+        // let mut events = self.events.borrow_mut().queue();
+        for event in self.events.borrow_mut().queue() {
+            match event.action {
+                Action::Click(_) => {
+
+                }
+            }
+        }
+        self.events.borrow_mut().queue().clear();
         if let Some(cell) = &mut self.controllers.last() {
             (cell.borrow_mut()).update(window);
         }
-        // let mut events = self.events.borrow_mut().queue();
-        // (*events).clear();
-        // for event in events.drain(..) {
-
-        // }
-        // *events;
-        // let _ = self.scene.update(window);
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
