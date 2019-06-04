@@ -61,15 +61,18 @@ impl EventQueue {
             weak_self: Weak::new(), // initialize empty
             events: Vec::new(),
         }));
-        // set weak_self once we get the Rc instance
         rc.borrow_mut().weak_self = Rc::downgrade(&rc);
         rc
     }
 
-    pub fn register_to(&mut self, notifier: &mut Notifier) {
+    pub fn get(&mut self) -> Rc<RefCell<Self>> {
+        self.weak_self.upgrade().unwrap()
+    }
+
+    pub fn register_to(&self, notifier: &mut Notifier) {
         let rc = self.weak_self.upgrade().unwrap();
         notifier.register(move |event| {
-            eprintln!("register_to event={:?}", event);
+            eprintln!("register event={:?}", event);
             rc.borrow_mut().store(event) })
     }
 

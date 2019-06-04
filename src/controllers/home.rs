@@ -4,7 +4,6 @@ use crate::application::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-// #[allow(unused_imports)]
 use quicksilver::{
     geom::{Rectangle, Vector},
     graphics::{Color},
@@ -20,10 +19,11 @@ use tweek::{
 pub struct HomeController {
     scene: Scene,
     navbar: NavBar,
+    events: Rc<RefCell<EventQueue>>,
 }
 
-impl HomeController {
-    pub fn new(screen: Vector) -> Self {
+impl<'a> HomeController {
+    pub fn new(screen: Vector) -> HomeController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
         let mut scene = Scene::new(&frame);
 
@@ -35,39 +35,52 @@ impl HomeController {
 
         let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         let navbar = NavBar::new(&frame);
-
-        Self {
+        // let events: &'a mut Rc<RefCell<EventQueue>> = &mut EventQueue::new();
+        // let e = events;
+        HomeController {
             scene,
             navbar,
+            events: EventQueue::new(),
         }
     }
+
+    // pub fn add_tween<'a>(&'a self, tween: &'a mut Tween) {
+    //     println!("add_tween for id={}", &tween.tween_id);
+    //     let subscribers = self.subscribers.clone();
+    //     tween.add_callback(move |e, g| {
+    //         println!("Tween callback: event={:?}", e);
+    //         for cb in subscribers.iter() {
+    //             (&*cb)(e, g);
+    //         }
+    //     });
+    // }
 
     // fn do_action(&mut self) {
 
     // }
 }
 
-impl Controller for HomeController {
+impl<'a> Controller for HomeController {
 
     fn view_will_load(&mut self) {
         self.navbar.color = Some(Color::RED);
         self.navbar.set_title("Home");
 
+        let events = self.events.clone();
         let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
         btn.set_onclick(move |_action, _tk| {
             let mut notifier = Notifier::new();
-            let rc = EventQueue::new();
-            rc.borrow_mut().register_to(&mut notifier);
+            events.borrow().register_to(&mut notifier);
             let evt = Event::new(Action::Click(42));
             notifier.notify(evt);
         });
         self.navbar.set_left_button(btn);
 
+        let events = self.events.clone();
         let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
         btn.set_onclick(move |_action, _tk| {
             let mut notifier = Notifier::new();
-            let rc = EventQueue::new();
-            rc.borrow_mut().register_to(&mut notifier);
+            events.borrow().register_to(&mut notifier);
             let evt = Event::new(Action::Click(43));
             notifier.notify(evt);
         });
@@ -105,5 +118,13 @@ impl<HomeController: FnMut(Event)> EventListener for HomeController {
     fn on_event(&mut self, event: Event) {
         eprintln!("event={:?}", event);
         self(event);
+
+        match event.action {
+            Action::Click(_) => {
+
+                // self.navbar.color = Some(Color::BLUE);
+            }
+            // _ => ()
+        }
     }
 }
