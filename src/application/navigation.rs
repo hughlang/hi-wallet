@@ -3,7 +3,7 @@ use crate::controllers::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -39,13 +39,16 @@ impl NavController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         let navbar = NavBar::new(&frame);
 
-        NavController {
+        let nav = NavController {
             controllers: Vec::new(),
             modal_controller: None,
             show_nav: true,
             navbar,
             events: EventQueue::new(),
-        }
+
+        };
+        // nav.events.borrow_mut().set_delegate(Rc::new(RefCell::new(nav)));
+        nav
     }
 
     pub fn show(&mut self, controller: Rc<RefCell<Controller>>) {
@@ -56,8 +59,6 @@ impl NavController {
 
 impl Controller for NavController {
     fn view_will_load(&mut self) {
-
-        // self.events.borrow_mut().set_delegate(Rc::new(RefCell::new(self)));
 
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);

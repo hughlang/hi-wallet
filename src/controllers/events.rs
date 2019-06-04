@@ -61,6 +61,7 @@ impl Event {
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
     delegate: Weak<Rc<RefCell<dyn EventDelegate>>>,
+    handler: Weak<RefCell<EventHandler>>,
     events: Vec<Event>,
 }
 
@@ -69,6 +70,7 @@ impl EventQueue {
         let rc = Rc::new(RefCell::new(Self {
             weak_self: Weak::new(), // initialize empty
             delegate: Weak::new(),
+            handler: Weak::new(),
             events: Vec::new(),
         }));
         rc.borrow_mut().weak_self = Rc::downgrade(&rc);
@@ -81,6 +83,10 @@ impl EventQueue {
 
     pub fn set_delegate(&mut self, delegate: Rc<RefCell<EventDelegate>>) {
         self.delegate = Rc::downgrade(&Rc::new(delegate));
+    }
+
+    pub fn set_handler(&mut self, handler: RefCell<EventHandler>) {
+        self.handler = Rc::downgrade(&Rc::new(handler));
     }
 
     pub fn register_to(&self, notifier: &mut Notifier) {
@@ -105,14 +111,15 @@ impl EventQueue {
 }
 
 pub trait EventDelegate {
-    fn handle_event(&mut self, event: Event) {
-
-    }
+    fn handle_event(&mut self, event: Event);
 }
 
-// impl<F> EventDelegate for F {
-//     fn handle_event(&mut self, event: Event) {
-//         // self(event);
-//         // self.handle_event(event);
-//     }
-// }
+pub struct EventHandler {
+
+}
+
+impl EventDelegate for EventHandler {
+    fn handle_event(&mut self, event: Event) {
+        eprintln!("NavController handle_event: {:?}", event);
+    }
+}
