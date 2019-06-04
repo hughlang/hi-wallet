@@ -22,7 +22,7 @@ pub struct HomeController {
     events: Rc<RefCell<EventQueue>>,
 }
 
-impl<'a> HomeController {
+impl HomeController {
     pub fn new(screen: Vector) -> HomeController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
         let mut scene = Scene::new(&frame);
@@ -35,32 +35,15 @@ impl<'a> HomeController {
 
         let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         let navbar = NavBar::new(&frame);
-        // let events: &'a mut Rc<RefCell<EventQueue>> = &mut EventQueue::new();
-        // let e = events;
         HomeController {
             scene,
             navbar,
             events: EventQueue::new(),
         }
     }
-
-    // pub fn add_tween<'a>(&'a self, tween: &'a mut Tween) {
-    //     println!("add_tween for id={}", &tween.tween_id);
-    //     let subscribers = self.subscribers.clone();
-    //     tween.add_callback(move |e, g| {
-    //         println!("Tween callback: event={:?}", e);
-    //         for cb in subscribers.iter() {
-    //             (&*cb)(e, g);
-    //         }
-    //     });
-    // }
-
-    // fn do_action(&mut self) {
-
-    // }
 }
 
-impl<'a> Controller for HomeController {
+impl Controller for HomeController {
 
     fn view_will_load(&mut self) {
         self.navbar.color = Some(Color::RED);
