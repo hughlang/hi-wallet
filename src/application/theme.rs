@@ -21,4 +21,17 @@ impl ThemeManager {
         theme.title_font = Some(font);
         theme
     }
+
+    pub fn nav_theme() -> Theme {
+        let mut theme = Theme::new(ROBOTO_BOLD);
+        theme.font_size = 18.0;
+        theme.font_bytes = ROBOTO_BOLD.into();
+        theme.bg_color = Color::from_hex("#333333");
+        theme.fg_color = Color::WHITE;
+
+        let font = Font::from_slice(ROBOTO_BOLD).unwrap();
+        theme.title_font = Some(font);
+        theme
+
+    }
 }

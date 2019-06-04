@@ -18,10 +18,6 @@ impl<F: FnMut(Event)> EventListener for F {
     }
 }
 
-pub trait EventDelegate {
-    fn handle_event(&mut self, event: Event);
-}
-
 pub struct Notifier {
     listeners: Vec<Box<EventListener>>,
 }
@@ -64,6 +60,7 @@ impl Event {
 
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
+    delegate: Weak<Rc<RefCell<EventDelegate>>>,
     events: Vec<Event>,
 }
 
@@ -71,6 +68,7 @@ impl EventQueue {
     pub fn new() -> Rc<RefCell<Self>> {
         let rc = Rc::new(RefCell::new(Self {
             weak_self: Weak::new(), // initialize empty
+            delegate: Weak::new(),
             events: Vec::new(),
         }));
         rc.borrow_mut().weak_self = Rc::downgrade(&rc);
@@ -81,16 +79,25 @@ impl EventQueue {
         self.weak_self.upgrade().unwrap()
     }
 
+    // pub fn set_delegate(&mut self, delegate: &'static EventDelegate) {
+    //     let rc = Rc::new(RefCell::new(delegate));
+    //     self.delegate = Rc::downgrade(&rc);
+    // }
+
     pub fn register_to(&self, notifier: &mut Notifier) {
         let rc = self.weak_self.upgrade().unwrap();
         notifier.register(move |event| {
             eprintln!("register event={:?}", event);
-            rc.borrow_mut().store(event) })
+            rc.borrow_mut().store(event);
+        })
     }
 
     pub fn store(&mut self, evt: Event) {
         self.events.push(evt);
         eprintln!("events count={:?}", self.events.len());
+        if let Some(delegate) = self.delegate.upgrade() {
+            delegate.borrow_mut().handle_event(evt.clone());
+        }
     }
 
     pub fn queue(&mut self) -> &Vec<Event> {
@@ -98,3 +105,15 @@ impl EventQueue {
     }
 }
 
+pub trait EventDelegate {
+    fn handle_event(&mut self, event: Event) {
+
+    }
+}
+
+// impl<F> EventDelegate for F {
+//     fn handle_event(&mut self, event: Event) {
+//         // self(event);
+//         // self.handle_event(event);
+//     }
+// }

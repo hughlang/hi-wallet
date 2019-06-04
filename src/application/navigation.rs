@@ -22,6 +22,10 @@ use tweek::{
     gui::{Button, Label, Scene, TKDisplayable, TKResponder, Theme},
 };
 
+// Magic numbers for different nav commands
+const BACK_BUTTON: u32 = 10;
+const NEXT_BUTTON: u32 = 20;
+
 pub struct NavController {
     pub controllers: Vec<Rc<RefCell<Controller>>>,
     pub modal_controller: Option<Rc<RefCell<Controller>>>,
@@ -41,7 +45,7 @@ impl NavController {
             show_nav: true,
             navbar,
             events: EventQueue::new(),
-            }
+        }
     }
 
     pub fn show(&mut self, controller: Rc<RefCell<Controller>>) {
@@ -52,7 +56,8 @@ impl NavController {
 
 impl Controller for NavController {
     fn view_will_load(&mut self) {
-        self.navbar.color = Some(Color::RED);
+        let theme = ThemeManager::nav_theme();
+        self.navbar.color = Some(theme.bg_color);
         self.navbar.set_title("Home");
 
         let events = self.events.clone();
@@ -60,7 +65,7 @@ impl Controller for NavController {
         btn.set_onclick(move |_action, _tk| {
             let mut notifier = Notifier::new();
             events.borrow().register_to(&mut notifier);
-            let evt = Event::new(Action::Click(42));
+            let evt = Event::new(Action::Click(BACK_BUTTON));
             notifier.notify(evt);
         });
         self.navbar.set_left_button(btn);
@@ -70,7 +75,7 @@ impl Controller for NavController {
         btn.set_onclick(move |_action, _tk| {
             let mut notifier = Notifier::new();
             events.borrow().register_to(&mut notifier);
-            let evt = Event::new(Action::Click(43));
+            let evt = Event::new(Action::Click(NEXT_BUTTON));
             notifier.notify(evt);
         });
         self.navbar.set_right_button(btn);
@@ -98,6 +103,9 @@ impl Controller for NavController {
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
         // let _ = self.scene.render(theme, window);
         let _ = self.navbar.render(theme, window);
+        if let Some(cell) = &mut self.controllers.last() {
+            (cell.borrow_mut()).render(theme, window);
+        }
     }
 
     fn handle_mouse_at(&mut self, pt: &Vector) -> bool {
@@ -114,6 +122,12 @@ impl Controller for NavController {
         // self.scene.handle_mouse_up(pt, state)
     }
 
+}
+
+impl EventDelegate for NavController {
+    fn handle_event(&mut self, event: Event) {
+
+    }
 }
 
 /// This is a simple nav bar that supports a left button, right button and title label in the middle.
