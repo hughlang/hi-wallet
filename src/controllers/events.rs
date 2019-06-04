@@ -60,7 +60,7 @@ impl Event {
 
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
-    delegate: Weak<Rc<RefCell<EventDelegate>>>,
+    delegate: Weak<Rc<RefCell<dyn EventDelegate>>>,
     events: Vec<Event>,
 }
 
@@ -79,10 +79,9 @@ impl EventQueue {
         self.weak_self.upgrade().unwrap()
     }
 
-    // pub fn set_delegate(&mut self, delegate: &'static EventDelegate) {
-    //     let rc = Rc::new(RefCell::new(delegate));
-    //     self.delegate = Rc::downgrade(&rc);
-    // }
+    pub fn set_delegate(&mut self, delegate: Rc<RefCell<EventDelegate>>) {
+        self.delegate = Rc::downgrade(&Rc::new(delegate));
+    }
 
     pub fn register_to(&self, notifier: &mut Notifier) {
         let rc = self.weak_self.upgrade().unwrap();

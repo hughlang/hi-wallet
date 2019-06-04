@@ -56,6 +56,9 @@ impl NavController {
 
 impl Controller for NavController {
     fn view_will_load(&mut self) {
+
+        // self.events.borrow_mut().set_delegate(Rc::new(RefCell::new(self)));
+
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);
         self.navbar.set_title("Home");
@@ -126,7 +129,7 @@ impl Controller for NavController {
 
 impl EventDelegate for NavController {
     fn handle_event(&mut self, event: Event) {
-
+        eprintln!("NavController handle_event: {:?}", event);
     }
 }
 
@@ -289,7 +292,7 @@ impl NavBar {
         if let Some(color) = &self.color {
             window.draw(&self.frame, Col(*color));
         }
-        self.scene.render(theme, window);
+        let _ = self.scene.render(theme, window);
     }
 }
 
