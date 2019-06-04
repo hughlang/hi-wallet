@@ -10,6 +10,12 @@ pub trait EventListener {
     fn on_event(&mut self, event: Event);
 }
 
+impl<F: FnMut(Event)> EventListener for F {
+    fn on_event(&mut self, event: Event) {
+        self(event);
+    }
+}
+
 pub struct Notifier {
     listeners: Vec<Box<EventListener>>,
 }
@@ -78,10 +84,10 @@ impl EventQueue {
 
     pub fn store(&mut self, evt: Event) {
         self.events.push(evt);
-        eprintln!("events count={:?}", self.events().len());
+        eprintln!("events count={:?}", self.events.len());
     }
 
-    pub fn events(&self) -> &Vec<Event> {
+    pub fn queue(&self) -> &Vec<Event> {
         &self.events
     }
 }

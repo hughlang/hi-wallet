@@ -97,17 +97,17 @@ impl Controller for HomeController {
 
 }
 
-impl<HomeController: FnMut(Event)> EventListener for HomeController {
-    fn on_event(&mut self, event: Event) {
-        eprintln!("event={:?}", event);
-        self(event);
+// impl<HomeController: FnMut(Event)> EventListener for HomeController {
+//     fn on_event(&mut self, event: Event) {
+//         eprintln!("event={:?}", event);
+//         self(event);
 
-        match event.action {
-            Action::Click(_) => {
+//         match event.action {
+//             Action::Click(_) => {
 
-                // self.navbar.color = Some(Color::BLUE);
-            }
-            // _ => ()
-        }
-    }
-}
+//                 // self.navbar.color = Some(Color::BLUE);
+//             }
+//             // _ => ()
+//         }
+//     }
+// }
