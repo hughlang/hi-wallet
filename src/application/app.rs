@@ -26,7 +26,7 @@ pub struct Application {
     screen: Vector,
     theme: Theme,
     tk_state: TKState,
-    main_controller: Option<Rc<RefCell<Controller>>>,
+    front_controller: Option<Rc<RefCell<Controller>>>,
 }
 
 impl Application {
@@ -35,14 +35,16 @@ impl Application {
 
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
+        let mut nav = NavController::new(screen);
         let mut home = HomeController::new(screen);
-        home.view_will_load();
+        nav.show(Rc::new(RefCell::new(home)));
+        nav.view_will_load();
 
         let s = Application {
             screen,
             theme: ThemeManager::default_theme(),
             tk_state: TKState::new(),
-            main_controller: Some(Rc::new(RefCell::new(home))),
+            front_controller: Some(Rc::new(RefCell::new(nav))),
         };
         Ok(s)
     }
@@ -55,7 +57,7 @@ impl State for Application {
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
-        if let Some(cell) = &mut self.main_controller {
+        if let Some(cell) = &mut self.front_controller {
             let mut controller = cell.borrow_mut();
             (&mut *controller).update(window);
         }
@@ -68,7 +70,7 @@ impl State for Application {
         window.clear(Color::from_hex("#EEEEEE"))?;
         // Nav controller rendering: If top view controller is a navcontroller,
         // render its subviews
-        if let Some(cell) = &mut self.main_controller {
+        if let Some(cell) = &mut self.front_controller {
             (cell.borrow_mut()).render(&mut self.theme, window);
         }
         Ok(())
@@ -81,7 +83,7 @@ impl State for Application {
                 log::debug!("size={:?} y={:?}", window.screen_size(), 0);
             }
             Event::MouseMoved(pt) => {
-                if let Some(cell) = &mut self.main_controller {
+                if let Some(cell) = &mut self.front_controller {
                     let hover = (cell.borrow_mut()).handle_mouse_at(pt);
                     if hover {
                         window.set_cursor(MouseCursor::Hand);
@@ -91,12 +93,12 @@ impl State for Application {
                 }
             }
             Event::MouseButton(MouseButton::Left, ButtonState::Pressed) => {
-                if let Some(cell) = &mut self.main_controller {
+                if let Some(cell) = &mut self.front_controller {
                     (cell.borrow_mut()).handle_mouse_down(&window.mouse().pos(), &mut self.tk_state);
                 }
             }
             Event::MouseButton(MouseButton::Left, ButtonState::Released) => {
-                if let Some(cell) = &mut self.main_controller {
+                if let Some(cell) = &mut self.front_controller {
                     (cell.borrow_mut()).handle_mouse_up(&window.mouse().pos(), &mut self.tk_state);
                 }
             }

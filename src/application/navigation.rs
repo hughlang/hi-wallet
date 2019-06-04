@@ -1,4 +1,5 @@
 use super::*;
+use crate::controllers::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
@@ -17,21 +18,102 @@ use stretch::{
 };
 
 use tweek::{
-    gui::*,
+    core::{TKState},
+    gui::{Button, Label, Scene, TKDisplayable, TKResponder, Theme},
 };
 
 pub struct NavController {
-    // navbar: NavBar,
-    pub controller_stack: Vec<Rc<RefCell<Controller>>>,
+    pub controllers: Vec<Rc<RefCell<Controller>>>,
     pub modal_controller: Option<Rc<RefCell<Controller>>>,
     pub show_nav: bool,
+    navbar: NavBar,
+    events: Rc<RefCell<EventQueue>>,
 }
 
 impl NavController {
-    pub fn new() -> Self {
-        // let navbar = NavBar::new(Vector::new())
-        NavController { controller_stack: Vec::new(), modal_controller: None, show_nav: true }
+    pub fn new(screen: Vector) -> Self {
+        let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
+        let navbar = NavBar::new(&frame);
+
+        NavController {
+            controllers: Vec::new(),
+            modal_controller: None,
+            show_nav: true,
+            navbar,
+            events: EventQueue::new(),
+            }
     }
+
+    pub fn show(&mut self, controller: Rc<RefCell<Controller>>) {
+        self.controllers.push(controller);
+        // TODO: Transition
+    }
+}
+
+impl Controller for NavController {
+    fn view_will_load(&mut self) {
+        self.navbar.color = Some(Color::RED);
+        self.navbar.set_title("Home");
+
+        let events = self.events.clone();
+        let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
+        btn.set_onclick(move |_action, _tk| {
+            let mut notifier = Notifier::new();
+            events.borrow().register_to(&mut notifier);
+            let evt = Event::new(Action::Click(42));
+            notifier.notify(evt);
+        });
+        self.navbar.set_left_button(btn);
+
+        let events = self.events.clone();
+        let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
+        btn.set_onclick(move |_action, _tk| {
+            let mut notifier = Notifier::new();
+            events.borrow().register_to(&mut notifier);
+            let evt = Event::new(Action::Click(43));
+            notifier.notify(evt);
+        });
+        self.navbar.set_right_button(btn);
+
+        self.navbar.layout_views();
+
+        if let Some(cell) = &mut self.controllers.last() {
+            (cell.borrow_mut()).view_will_load();
+        }
+    }
+
+    fn update(&mut self, window: &mut Window) {
+        if let Some(cell) = &mut self.controllers.last() {
+            (cell.borrow_mut()).update(window);
+        }
+        // let mut events = self.events.borrow_mut().queue();
+        // (*events).clear();
+        // for event in events.drain(..) {
+
+        // }
+        // *events;
+        // let _ = self.scene.update(window);
+    }
+
+    fn render(&mut self, theme: &mut Theme, window: &mut Window) {
+        // let _ = self.scene.render(theme, window);
+        let _ = self.navbar.render(theme, window);
+    }
+
+    fn handle_mouse_at(&mut self, pt: &Vector) -> bool {
+        self.navbar.scene.handle_mouse_at(pt)
+    }
+
+    fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
+        self.navbar.scene.handle_mouse_down(pt, state)
+        // self.scene.handle_mouse_down(pt, state)
+    }
+
+    fn handle_mouse_up(&mut self, pt: &Vector, state: &mut TKState) -> bool {
+        self.navbar.scene.handle_mouse_up(pt, state)
+        // self.scene.handle_mouse_up(pt, state)
+    }
+
 }
 
 /// This is a simple nav bar that supports a left button, right button and title label in the middle.

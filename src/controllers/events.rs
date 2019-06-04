@@ -8,12 +8,18 @@ use std::rc::{Rc, Weak};
 
 pub trait EventListener {
     fn on_event(&mut self, event: Event);
+
 }
 
 impl<F: FnMut(Event)> EventListener for F {
     fn on_event(&mut self, event: Event) {
         self(event);
+        // self.handle_event(event);
     }
+}
+
+pub trait EventDelegate {
+    fn handle_event(&mut self, event: Event);
 }
 
 pub struct Notifier {
@@ -87,7 +93,7 @@ impl EventQueue {
         eprintln!("events count={:?}", self.events.len());
     }
 
-    pub fn queue(&self) -> &Vec<Event> {
+    pub fn queue(&mut self) -> &Vec<Event> {
         &self.events
     }
 }
