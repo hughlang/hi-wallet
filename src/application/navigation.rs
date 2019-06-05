@@ -109,7 +109,8 @@ impl NavController {
                         }
                         _ => ()
                     }
-                }
+                },
+                _ => ()
             }
         }
 
@@ -167,7 +168,27 @@ impl Controller for NavController {
         (&mut *controller).view_will_load();
     }
 
+    #[allow(dead_code)]
+    #[allow(unreachable_patterns)]
     fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
+        let mut nav_event: Option<NavEvent> = None;
+        if let Some(event) = self.events.borrow_mut().queue().first() {
+            match event.action {
+                Action::Click(tag) => {
+                    match tag {
+                        BACK_BUTTON => { nav_event = Some(NavEvent::Back) },
+                        NEXT_BUTTON => { nav_event = Some(NavEvent::Next) },
+                        _ => {}
+                    }
+                },
+                Action::Selected(idx) => { nav_event = Some(NavEvent::Selected(idx)) },
+                _ => {}
+            }
+        }
+        if let Some(evt) = nav_event {
+            ctx.event_bus.register_event(evt);
+        }
+
         if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
             controller.borrow_mut().update(ctx, window);
         }

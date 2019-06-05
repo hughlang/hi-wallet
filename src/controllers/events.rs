@@ -43,6 +43,7 @@ impl Notifier {
 #[derive(Debug, Clone, Copy)]
 pub enum Action {
     Click(u32),
+    Selected(usize),
 }
 
 #[derive(Debug, Clone, Copy)]

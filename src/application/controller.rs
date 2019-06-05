@@ -37,6 +37,9 @@ pub trait Controller {
     /// layout subviews, load data, and prepare for display.
     fn view_will_load(&mut self) {}
 
+    /// Method to signal to controller that it will be leaving or entering the parent controller
+    fn will_transition_in(&mut self) {}
+
     /// The sync method is called from Quicksilver's update loop and eventually gets passed down
     /// to the Scene and lower level Tweek gui objects. It carries the AppContext as a mutable ref
     /// which contains the EventBus where events are propogated up (and possibly down, TBD)
