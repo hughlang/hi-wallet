@@ -1,5 +1,6 @@
 use super::*;
 use crate::application::*;
+use crate::events::*;
 
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -16,29 +17,29 @@ use tweek::{
     shared::DrawShape,
 };
 
+#[allow(dead_code)]
 pub struct HomeController {
+    frame: Rectangle,
     scene: Scene,
-    // nav: Weak<RefCell<NavController>>,
     events: Rc<RefCell<EventQueue>>,
 }
 
 impl HomeController {
-    pub fn new(screen: Vector) -> HomeController {
-        let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
+    pub fn new(frame: Rectangle) -> HomeController {
         let mut scene = Scene::new(&frame);
 
-        let frame = Rectangle::new((10.0, 70.0), (screen.x - 20.0, screen.y - 90.0));
+        let box_frame = Rectangle::new((10.0, 70.0), (frame.x() - 20.0, frame.y() - 90.0));
         let line_color = Color::from_hex("#CCCCCC");
         let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 1.0, 0.0);
-        let shape = ShapeView::new(frame).with_mesh(&mut mesh);
+        let shape = ShapeView::new(box_frame).with_mesh(&mut mesh);
         scene.views.push(Rc::new(RefCell::new(shape)));
 
         // let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         // let navbar = NavBar::new(&frame);
 
         let controller = HomeController {
+            frame,
             scene,
-            // nav: nav,
             events: EventQueue::new(),
         };
 
@@ -72,7 +73,22 @@ impl Controller for HomeController {
         items
     }
 
-    fn sync(&mut self, ctx: &mut AppContext, window: &mut Window) {
+    fn get_nav_target(&mut self, event: NavEvent) -> Option<NavTarget> {
+        match event {
+            NavEvent::Next => {
+                let controller = SettingsController::new(self.frame.clone());
+                let target = NavTarget {
+                    nav_event: event,
+                    controller: Rc::new(RefCell::new(controller))
+                };
+                return Some(target);
+            }
+            _ => ()
+        }
+        None
+    }
+
+    fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();
         // (*events).clear();
         // for event in events.drain(..) {
@@ -80,6 +96,7 @@ impl Controller for HomeController {
         // }
         // *events;
         let _ = self.scene.update(window);
+
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {

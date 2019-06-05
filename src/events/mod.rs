@@ -4,10 +4,6 @@ pub use self::window::*;
 mod nav;
 mod window;
 
-// *****************************************************************************************************
-// Prototyping area below
-// *****************************************************************************************************
-
 use std::{
     any::{Any, TypeId},
     cell::{Cell, RefCell},
@@ -15,7 +11,12 @@ use std::{
     rc::Rc,
 };
 
-/// Used to define an event.
+// *****************************************************************************************************
+// Prototyping area below
+// Most of this code was copied from OrbTk and modified for compatibility
+// *****************************************************************************************************
+
+/// Used to define an event trait.
 pub trait AnyEvent: Any {}
 
 pub struct EventSystem {

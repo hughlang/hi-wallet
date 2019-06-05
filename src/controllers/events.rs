@@ -1,4 +1,4 @@
-/// This events system follows the design pattern described here:
+/// This events system follows the Observer design pattern described here:
 /// https://blog.rom1v.com/2017/09/gnirehtet-rewritten-in-rust/#observer
 /// In this code, the Storage struct is called EventQueue
 
@@ -56,10 +56,16 @@ impl Event {
     }
 }
 
+// Unused. It doesn't work because the delegate field in EventQueue is not holding the
+// reference without ownership issues.
+pub trait EventDelegate {
+    fn handle_event(&mut self, event: Event);
+}
+
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
-    delegate: Weak<Rc<RefCell<dyn EventDelegate>>>,
-    handlers: Vec<Rc<RefCell<EventDelegate>>>,
+    delegate: Weak<Rc<RefCell<dyn EventDelegate>>>, // Does not work
+    handlers: Vec<Rc<RefCell<EventDelegate>>>,      // Does not work
     events: Vec<Event>,
 }
 
@@ -79,8 +85,11 @@ impl EventQueue {
         self.weak_self.upgrade().unwrap()
     }
 
-    pub fn set_delegate(&mut self, delegate: Rc<RefCell<EventDelegate>>) {
-        self.delegate = Rc::downgrade(&Rc::new(delegate));
+    pub fn set_delegate(&mut self, delegate: Weak<RefCell<EventDelegate>>) {
+        if let Some(rc) = delegate.upgrade() {
+            let weak_delegate = Rc::downgrade(&Rc::new(rc));
+            self.delegate = weak_delegate;
+        }
     }
 
     pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
@@ -108,16 +117,3 @@ impl EventQueue {
     }
 }
 
-pub trait EventDelegate {
-    fn handle_event(&mut self, event: Event);
-}
-
-// pub struct EventHandler {
-
-// }
-
-// impl EventDelegate for EventHandler {
-//     fn handle_event(&mut self, event: Event) {
-//         eprintln!("NavController handle_event: {:?}", event);
-//     }
-// }

@@ -1,8 +1,12 @@
 use super::*;
-// use crate::prelude::*;
-use tweek::prelude::*;
+use crate::events::*;
 
 use quicksilver::{geom::Vector, lifecycle::Window};
+
+use tweek::{
+    core::{TKState},
+    gui::{Theme},
+};
 
 /// See: https://developer.apple.com/documentation/uikit/uimodaltransitionstyle
 pub enum ModalTransitionStyle {
@@ -26,6 +30,9 @@ pub trait Controller {
     /// The controller provides the list of nav items to appear in the navbar from left-to-right
     fn right_nav_items(&self) -> Vec<NavItem> { Vec::new() }
 
+    /// Get wrapper for next view controller to navigate to
+    fn get_nav_target(&mut self, _event: NavEvent) -> Option<NavTarget> { None }
+
     /// This is the first stage in the view lifecycle after new() is called. Here is where you should
     /// layout subviews, load data, and prepare for display.
     fn view_will_load(&mut self) {}
@@ -33,7 +40,7 @@ pub trait Controller {
     /// The sync method is called from Quicksilver's update loop and eventually gets passed down
     /// to the Scene and lower level Tweek gui objects. It carries the AppContext as a mutable ref
     /// which contains the EventBus where events are propogated up (and possibly down, TBD)
-    fn sync(&mut self, ctx: &mut AppContext, window: &mut Window);
+    fn update(&mut self, ctx: &mut AppContext, window: &mut Window);
 
     /// This is generally a passthru method to the Tweek gui components
     fn render(&mut self, theme: &mut Theme, window: &mut Window);
@@ -49,6 +56,7 @@ pub trait Controller {
 
     /// This is generally a passthru method to the Tweek gui controls
     fn handle_mouse_scroll(&mut self, _pt: &Vector) {}
+
 
 }
 

@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 // #[allow(unused_imports)]
 use quicksilver::{
-    geom::Vector,
+    geom::{Rectangle, Vector},
     graphics::Color,
     input::{ButtonState, Key, MouseButton, MouseCursor},
     lifecycle::{Event, State, Window},
@@ -43,17 +43,20 @@ pub struct Application {
 
 impl Application {
     pub fn new(screen: Vector) -> Result<Application> {
-        std::env::set_var("RUST_LOG", "main=trace,tweek=debug");
+        std::env::set_var("RUST_LOG", "main=trace,hi_wallet=debug");
 
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
+        #[cfg(not(target_arch = "wasm32"))]
+        color_backtrace::install();
 
-        let mut nav = NavController::new(screen);
-        // let rc = Rc::new(RefCell::new(nav));
-        // let weaknav = Rc::downgrade(&rc);
-        let home = HomeController::new(screen);
+        let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
+        let mut nav = NavController::new(frame);
 
+        let frame = Rectangle::new((0.0, 50.0), (screen.x, screen.y - 50.0));
+        let home = HomeController::new(frame.clone());
         nav.show(Rc::new(RefCell::new(home)));
+
         nav.view_will_load();
 
         let s = Application {
@@ -77,7 +80,7 @@ impl State for Application {
     fn update(&mut self, window: &mut Window) -> Result<()> {
         if let Some(cell) = &mut self.front_controller {
             let mut controller = cell.borrow_mut();
-            (&mut *controller).sync(&mut self.context, window);
+            (&mut *controller).update(&mut self.context, window);
         }
 
         Ok(())

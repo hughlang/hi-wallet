@@ -1,17 +1,23 @@
 /// Events related to navigation requests and actions
 ///
-use super::{AnyEvent, EventBox, EventHandler};
+use super::{AnyEvent};
 
 pub enum NavEvent {
+    /// Go back in navigation controller
     Back,
+    /// Go next in a sequence, provided by the current controller
+    Next,
+    /// Go to the Home screen
     Home,
-    Detail(usize), // usize is the index of the selected item from datasource
+    /// Navigate to first view controller in nav
+    Root,
+    /// Display modal
+    Modal,
+    /// Open detail view for selected index
+    Selected(usize),
 }
 
-pub struct NavButtonEvent {
+impl AnyEvent for NavEvent {}
 
-}
+pub type NavEventHandler = Fn(NavEvent) -> bool + 'static;
 
-impl AnyEvent for NavButtonEvent {}
-
-// pub type NavEventHandler = Fn(Key) -> bool + 'static;
