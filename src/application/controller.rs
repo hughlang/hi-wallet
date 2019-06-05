@@ -31,7 +31,7 @@ pub trait Controller {
     fn right_nav_items(&self) -> Vec<NavItem> { Vec::new() }
 
     /// Get wrapper for next view controller to navigate to
-    fn get_nav_target(&mut self, _event: NavEvent) -> Option<NavTarget> { None }
+    fn get_nav_target(&mut self, _event: &NavEvent) -> Option<NavTarget> { None }
 
     /// This is the first stage in the view lifecycle after new() is called. Here is where you should
     /// layout subviews, load data, and prepare for display.

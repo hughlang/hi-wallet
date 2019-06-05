@@ -69,7 +69,7 @@ impl Controller for SettingsController {
     //     items
     // }
 
-    fn get_nav_target(&mut self, evt: NavEvent) -> Option<NavTarget> {
+    fn get_nav_target(&mut self, evt: &NavEvent) -> Option<NavTarget> {
         // let controller = SettingsCont
         None
 

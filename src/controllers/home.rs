@@ -73,12 +73,12 @@ impl Controller for HomeController {
         items
     }
 
-    fn get_nav_target(&mut self, event: NavEvent) -> Option<NavTarget> {
+    fn get_nav_target(&mut self, event: &NavEvent) -> Option<NavTarget> {
         match event {
             NavEvent::Next => {
                 let controller = SettingsController::new(self.frame.clone());
                 let target = NavTarget {
-                    nav_event: event,
+                    nav_event: event.clone(),
                     controller: Rc::new(RefCell::new(controller))
                 };
                 return Some(target);

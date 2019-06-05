@@ -2,6 +2,7 @@
 ///
 use super::{AnyEvent};
 
+#[derive(Debug, Clone, Copy)]
 pub enum NavEvent {
     /// Go back in navigation controller
     Back,

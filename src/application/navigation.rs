@@ -80,6 +80,7 @@ impl NavController {
         eprintln!("nav message={:?}", message);
     }
 
+    /// Unused
     pub fn process_events(&mut self, ctx: &mut AppContext) {
        // Create a list of all the nav events being requested. Usually, there's only 1.
         // However, there may be a need to resolve which nav action should take precedence.
@@ -97,7 +98,7 @@ impl NavController {
         // Review events in the queue.
         for event in self.events.borrow_mut().queue() {
             match event.action {
-                Action::Click(tag) => {
+                Action::Button(tag) => {
                     match tag {
                         BACK_BUTTON => {
                             // Create NavEvent to pop nav controller and add to EventBus
@@ -117,7 +118,7 @@ impl NavController {
         if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
             eprintln!("nav_events count={:?}", nav_events.len());
             if let Some(nav_event) = nav_events.pop() {
-                if let Some(target) = controller.borrow_mut().get_nav_target(nav_event) {
+                if let Some(target) = controller.borrow_mut().get_nav_target(&nav_event) {
                     self.next_target = Some(target);
                     // self.show(target.controller);
                 }
@@ -144,7 +145,7 @@ impl Controller for NavController {
             btn.set_onclick(move |_action, _tk| {
                 let mut notifier = Notifier::new();
                 events.borrow().register_to(&mut notifier);
-                let evt = Event::new(Action::Click(tag));
+                let evt = Event::new(Action::Button(tag));
                 notifier.notify(evt);
             });
             self.navbar.add_left_button(btn);
@@ -157,7 +158,7 @@ impl Controller for NavController {
             btn.set_onclick(move |_action, _tk| {
                 let mut notifier = Notifier::new();
                 events.borrow().register_to(&mut notifier);
-                let evt = Event::new(Action::Click(tag));
+                let evt = Event::new(Action::Button(tag));
                 notifier.notify(evt);
             });
             self.navbar.add_right_button(btn);
@@ -174,7 +175,7 @@ impl Controller for NavController {
         let mut nav_event: Option<NavEvent> = None;
         if let Some(event) = self.events.borrow_mut().queue().first() {
             match event.action {
-                Action::Click(tag) => {
+                Action::Button(tag) => {
                     match tag {
                         BACK_BUTTON => { nav_event = Some(NavEvent::Back) },
                         NEXT_BUTTON => { nav_event = Some(NavEvent::Next) },
@@ -186,6 +187,11 @@ impl Controller for NavController {
             }
         }
         if let Some(evt) = nav_event {
+            if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
+                if let Some(target) = controller.borrow_mut().get_nav_target(&evt) {
+                    self.next_target = Some(target);
+                }
+            }
             ctx.event_bus.register_event(evt);
         }
 
