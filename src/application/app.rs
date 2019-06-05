@@ -18,7 +18,7 @@ use quicksilver::{
 /// throughout the controller/scene hierarchy.
 pub struct AppContext {
     pub screen: Vector,
-    event_bus: EventBus,
+    pub event_bus: EventBus,
 }
 
 impl AppContext {
@@ -77,7 +77,7 @@ impl State for Application {
     fn update(&mut self, window: &mut Window) -> Result<()> {
         if let Some(cell) = &mut self.front_controller {
             let mut controller = cell.borrow_mut();
-            (&mut *controller).update(window);
+            (&mut *controller).sync(&mut self.context, window);
         }
 
         Ok(())

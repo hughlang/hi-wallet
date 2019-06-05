@@ -72,7 +72,7 @@ impl Controller for HomeController {
         items
     }
 
-    fn update(&mut self, window: &mut Window) {
+    fn sync(&mut self, ctx: &mut AppContext, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();
         // (*events).clear();
         // for event in events.drain(..) {

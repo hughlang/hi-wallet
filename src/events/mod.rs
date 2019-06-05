@@ -18,6 +18,11 @@ use std::{
 /// Used to define an event.
 pub trait AnyEvent: Any {}
 
+pub struct EventSystem {
+    // pub handlers: Rc<RefCell<BTreeMap<Entity, Vec<Rc<dyn EventHandler>>>>>,
+    pub update: Rc<Cell<bool>>,
+    pub running: Rc<Cell<bool>>,
+}
 
 pub trait EventHandler {
     /// Handles an `event` by the given `widget`. If it returns `true` the event will not be forwarded.
@@ -35,6 +40,8 @@ pub struct EventBox {
     event_type: TypeId,
 }
 
+/// Disclosure: This structure was copied from OrbTk, along with other code on this page.
+/// TODO: discuss how to attribute code fragments copied from other projects.
 impl EventBox {
     pub fn new<E: AnyEvent>(event: E) -> Self {
         EventBox { event: Box::new(event), event_type: TypeId::of::<E>() }
@@ -46,6 +53,20 @@ impl EventBox {
 
     pub fn event_type(&self) -> TypeId {
         self.event_type
+    }
+
+    pub fn downcast<E: AnyEvent>(self) -> Result<E, EventError> {
+        if self.event_type == TypeId::of::<E>() {
+            return Ok(*self.event.downcast::<E>().unwrap());
+        }
+        Err(EventError::WrongType(TypeId::of::<E>()))
+    }
+
+    pub fn downcast_ref<E: Any>(&self) -> Result<&E, EventError> {
+        if self.event_type == TypeId::of::<E>() {
+            return Ok(&*self.event.downcast_ref::<E>().unwrap());
+        }
+        Err(EventError::WrongType(TypeId::of::<E>()))
     }
 }
 
@@ -75,9 +96,25 @@ impl EventBus {
     }
 }
 
-pub struct EventSystem {
-    // pub handlers: Rc<RefCell<BTreeMap<Entity, Vec<Rc<dyn EventHandler>>>>>,
-    pub update: Rc<Cell<bool>>,
-    pub running: Rc<Cell<bool>>,
+impl<'a> IntoIterator for &'a mut EventBus {
+    type Item = EventBox;
+    type IntoIter = EventBusIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        EventBusIterator { event_queue: self }
+    }
 }
+
+pub struct EventBusIterator<'a> {
+    event_queue: &'a mut EventBus,
+}
+
+impl<'a> Iterator for EventBusIterator<'a> {
+    type Item = EventBox;
+
+    fn next(&mut self) -> Option<EventBox> {
+        self.event_queue.dequeue()
+    }
+}
+
 

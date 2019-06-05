@@ -1,5 +1,6 @@
 use super::*;
 use crate::controllers::*;
+use crate::events::*;
 
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -109,25 +110,37 @@ impl Controller for NavController {
         (&mut *controller).view_will_load();
     }
 
-    fn update(&mut self, window: &mut Window) {
-        // let mut events = self.events.borrow_mut().queue();
+    fn sync(&mut self, ctx: &mut AppContext, window: &mut Window) {
+        // Review the EventBus, which will contain messages propogated from child controllers
+        for event in ctx.event_bus.into_iter() {
+            if let Ok(event) = event.downcast_ref::<NavEvent>() {
+            //     match event {
+            }
+        }
+
+        // Review events in the queue.
         for event in self.events.borrow_mut().queue() {
             match event.action {
-                Action::Click(_) => {
-
+                Action::Click(tag) => {
+                    match tag {
+                        BACK_BUTTON => {
+                            // Create NavEvent to pop nav controller and add to EventBus
+                        }
+                        _ => ()
+                    }
                 }
             }
         }
-        self.events.borrow_mut().queue().clear();
-        if let Some(cell) = &mut self.controllers.last() {
-            (cell.borrow_mut()).update(window);
+        // self.events.borrow_mut().queue().clear();
+        if let Some(cell) = &mut self.controllers.get_mut(self.front_idx) {
+            (cell.borrow_mut()).sync(ctx, window);
         }
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
         // let _ = self.scene.render(theme, window);
         let _ = self.navbar.render(theme, window);
-        if let Some(cell) = &mut self.controllers.last() {
+        if let Some(cell) = &mut self.controllers.get_mut(self.front_idx) {
             (cell.borrow_mut()).render(theme, window);
         }
     }
@@ -139,7 +152,7 @@ impl Controller for NavController {
     fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
         println!(">>> NAV handle_mouse_down");
         self.navbar.scene.handle_mouse_down(pt, state);
-        if let Some(cell) = &mut self.controllers.last() {
+        if let Some(cell) = &mut self.controllers.get_mut(self.front_idx) {
             (cell.borrow_mut()).handle_mouse_down(pt, state);
         }
         false
