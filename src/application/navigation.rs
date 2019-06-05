@@ -37,6 +37,7 @@ pub struct NavController {
     navbar: NavBar,
     pub show_nav: bool,
     events: Rc<RefCell<EventQueue>>,
+    next_target: Option<NavTarget>,
 }
 
 // impl Copy for NavController { }
@@ -60,7 +61,10 @@ impl NavController {
             navbar,
             show_nav: true,
             events: EventQueue::new(),
+            next_target: None,
         };
+
+        // This shit don't work
         // let weakself = Rc::downgrade(&Rc::new(RefCell::new(nav)));
         // nav.events.borrow_mut().set_delegate(weakself);
         nav
@@ -109,14 +113,15 @@ impl NavController {
             }
         }
 
-        // if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
-        //     eprintln!("nav_events count={:?}", nav_events.len());
-        //     if let Some(nav_event) = nav_events.pop() {
-        //         if let Some(target) = controller.borrow().get_nav_target(nav_event) {
-        //             self.show(target.controller);
-        //         }
-        //     }
-        // }
+        if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
+            eprintln!("nav_events count={:?}", nav_events.len());
+            if let Some(nav_event) = nav_events.pop() {
+                if let Some(target) = controller.borrow_mut().get_nav_target(nav_event) {
+                    self.next_target = Some(target);
+                    // self.show(target.controller);
+                }
+            }
+        }
     }
 }
 

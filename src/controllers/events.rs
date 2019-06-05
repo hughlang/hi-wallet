@@ -81,10 +81,12 @@ impl EventQueue {
         rc
     }
 
+    // Unused and not needed?
     pub fn get(&mut self) -> Rc<RefCell<Self>> {
         self.weak_self.upgrade().unwrap()
     }
 
+    // Unused and doesn't work
     pub fn set_delegate(&mut self, delegate: Weak<RefCell<EventDelegate>>) {
         if let Some(rc) = delegate.upgrade() {
             let weak_delegate = Rc::downgrade(&Rc::new(rc));
@@ -92,6 +94,7 @@ impl EventQueue {
         }
     }
 
+    // Unused and doesn't work
     pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
         self.handlers.push(handler);
     }
@@ -107,9 +110,9 @@ impl EventQueue {
     pub fn store(&mut self, evt: Event) {
         self.events.push(evt);
         eprintln!("events count={:?}", self.events.len());
-        // if let Some(delegate) = self.delegate.upgrade() {
-        //     delegate.borrow_mut().handle_event(evt.clone());
-        // }
+        if let Some(delegate) = self.delegate.upgrade() {
+            delegate.borrow_mut().handle_event(evt.clone());
+        }
     }
 
     pub fn queue(&mut self) -> &mut Vec<Event> {

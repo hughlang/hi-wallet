@@ -81,6 +81,8 @@ impl State for Application {
         if let Some(cell) = &mut self.front_controller {
             let mut controller = cell.borrow_mut();
             (&mut *controller).update(&mut self.context, window);
+
+            // TODO: Read EventBus
         }
 
         Ok(())

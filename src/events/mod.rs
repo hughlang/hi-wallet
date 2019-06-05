@@ -73,7 +73,7 @@ impl EventBox {
 
 #[derive(Default, Debug)]
 pub struct EventBus {
-    event_queue: Vec<EventBox>,
+    pub event_queue: Vec<EventBox>,
 }
 
 impl EventBus {
@@ -110,6 +110,7 @@ pub struct EventBusIterator<'a> {
     event_queue: &'a mut EventBus,
 }
 
+// TODO: Verify if the iterator should dequeue and drain itself.
 impl<'a> Iterator for EventBusIterator<'a> {
     type Item = EventBox;
 
