@@ -55,6 +55,10 @@ impl NavController {
         self.controllers.push(controller);
         // TODO: Transition
     }
+
+    pub fn notify(&self, message: &str) {
+        eprintln!("nav message={:?}", message);
+    }
 }
 
 impl Controller for NavController {
@@ -124,7 +128,12 @@ impl Controller for NavController {
     }
 
     fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
-        self.navbar.scene.handle_mouse_down(pt, state)
+        println!(">>> NAV handle_mouse_down");
+        self.navbar.scene.handle_mouse_down(pt, state);
+        if let Some(cell) = &mut self.controllers.last() {
+            (cell.borrow_mut()).handle_mouse_down(pt, state);
+        }
+        false
         // self.scene.handle_mouse_down(pt, state)
     }
 

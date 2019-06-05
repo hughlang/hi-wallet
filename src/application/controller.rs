@@ -15,6 +15,8 @@ pub enum ModalTransitionStyle {
 /// a NavController, so that a modal controller could actually start a new navigation stack in
 /// a modal view.
 pub trait Controller {
+    fn view_will_load(&mut self) {}
+
     fn update(&mut self, window: &mut Window);
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window);
@@ -27,16 +29,6 @@ pub trait Controller {
 
     fn handle_mouse_scroll(&mut self, _pt: &Vector) {}
 
-    /*
-    Ideas:
-    – notify: willLoad, didLoad, willAppear, willDisappear, etc
-    – getNavController
-
-    */
-
-    // Similar to iOS init (with resources)
-    // fn init() -> Self;
-    fn view_will_load(&mut self) {}
 }
 
 // UNUSED

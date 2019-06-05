@@ -72,6 +72,12 @@ impl<'a> Controller for HomeController<'a> {
     }
 
     fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
+        println!(">>> handle_mouse_down");
+        if let Some(ref mut rc) = self.nav.upgrade() {
+            let mut nav = rc.borrow_mut();
+            (&mut *nav).notify("Booo");
+            // rc.borrow_mut().notify("Mouse down");
+        }
         self.scene.handle_mouse_down(pt, state)
     }
 
