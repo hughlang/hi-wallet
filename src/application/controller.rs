@@ -15,6 +15,15 @@ pub enum ModalTransitionStyle {
 /// a NavController, so that a modal controller could actually start a new navigation stack in
 /// a modal view.
 pub trait Controller {
+
+    fn screen_title(&self) -> &str { "" }
+
+    /// The controller provides the list of nav items to appear in the navbar from left-to-right
+    fn left_nav_items(&self) -> Vec<NavItem> { Vec::new() }
+
+    /// The controller provides the list of nav items to appear in the navbar from left-to-right
+    fn right_nav_items(&self) -> Vec<NavItem> { Vec::new() }
+
     fn view_will_load(&mut self) {}
 
     fn update(&mut self, window: &mut Window);
@@ -28,16 +37,6 @@ pub trait Controller {
     fn handle_mouse_up(&mut self, _pt: &Vector, _state: &mut TKState) -> bool { false }
 
     fn handle_mouse_scroll(&mut self, _pt: &Vector) {}
-
-    /// The controller provides the list of nav items to appear in the navbar from left-to-right
-    fn left_nav_items(&self) -> Vec<NavItem> {
-        Vec::new()
-    }
-
-    /// The controller provides the list of nav items to appear in the navbar from left-to-right
-    fn right_nav_items(&self) -> Vec<NavItem> {
-        Vec::new()
-    }
 
 }
 

@@ -72,7 +72,6 @@ impl Controller for NavController {
 
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);
-        self.navbar.set_title("Home");
 
         if self.front_idx >= self.controllers.len() {
             return;
@@ -89,7 +88,7 @@ impl Controller for NavController {
                 let evt = Event::new(Action::Click(tag));
                 notifier.notify(evt);
             });
-            self.navbar.set_left_button(btn);
+            self.navbar.add_left_button(btn);
         }
 
         for item in controller.right_nav_items() {
@@ -102,9 +101,10 @@ impl Controller for NavController {
                 let evt = Event::new(Action::Click(tag));
                 notifier.notify(evt);
             });
-            self.navbar.set_right_button(btn);
+            self.navbar.add_right_button(btn);
         }
 
+        self.navbar.set_title(controller.screen_title());
         self.navbar.layout_views();
         (&mut *controller).view_will_load();
     }

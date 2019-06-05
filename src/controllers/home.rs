@@ -51,6 +51,11 @@ impl HomeController {
 }
 
 impl Controller for HomeController {
+
+    fn screen_title(&self) -> &str {
+        "Home"
+    }
+
     fn left_nav_items(&self) -> Vec<NavItem> {
         let mut items: Vec<NavItem> = Vec::new();
         let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");

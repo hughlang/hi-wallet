@@ -30,9 +30,9 @@ pub struct NavBar {
     pub frame: Rectangle,
     pub scene: Scene,
     pub color: Option<Color>,
-    title_ptr: Option<usize>,
-    left_btn_id: Option<usize>, // todo: make these a vec of usize IDs to allow multiple buttons
-    right_btn_id: Option<usize>,
+    title_ptr: Option<usize>, // todo: allow for stacked title
+    left_btns: Vec<usize>,
+    right_btns: Vec<usize>,
     layout: Option<Layout>,
 }
 
@@ -45,8 +45,8 @@ impl NavBar {
             scene,
             color: None,
             title_ptr: None,
-            left_btn_id: None,
-            right_btn_id: None,
+            left_btns: Vec::new(),
+            right_btns: Vec::new(),
             layout: None
         }
     }
@@ -61,24 +61,14 @@ impl NavBar {
         }
     }
 
-    /// TODO: make it Option<Button> where None means remove the current button
-    pub fn set_left_button(&mut self, button: Button) {
-        if let Some(idx) = &self.left_btn_id {
-            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
-        } else {
-            self.scene.controls.push(Rc::new(RefCell::new(button)));
-            self.left_btn_id = Some(self.scene.controls.len() - 1);
-        }
+    pub fn add_left_button(&mut self, button: Button) {
+        self.scene.controls.push(Rc::new(RefCell::new(button)));
+        self.left_btns.push(self.scene.controls.len() - 1);
     }
 
-    /// TODO: make it Option<Button> where None means remove the current button
-    pub fn set_right_button(&mut self, button: Button) {
-        if let Some(idx) = &self.right_btn_id {
-            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
-        } else {
-            self.scene.controls.push(Rc::new(RefCell::new(button)));
-            self.right_btn_id = Some(self.scene.controls.len() - 1);
-        }
+    pub fn add_right_button(&mut self, button: Button) {
+        self.scene.controls.push(Rc::new(RefCell::new(button)));
+        self.right_btns.push(self.scene.controls.len() - 1);
     }
 
     /// This layout defines a % split of 20-60-20 for the 3 sections. Each section has children nodes and
@@ -132,27 +122,32 @@ impl NavBar {
                 ),
             ],
         );
+        const LEFT_NODE: usize = 0;
+        const TITLE_NODE: usize = 1;
+        const RIGHT_NODE: usize = 2;
 
-        if let Some(idx) = &self.left_btn_id {
+        // Iterate through the matching scene.buttons and create placeholders in the layout
+        for idx in &self.left_btns {
             let cell = &mut self.scene.controls[*idx];
             let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[0].add_child(&leaf);
+            node.children()[LEFT_NODE].add_child(&leaf);
         }
-        if let Some(idx) = &self.right_btn_id {
+        for idx in &self.right_btns {
             let cell = &mut self.scene.controls[*idx];
             let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[2].add_child(&leaf);
+            node.children()[RIGHT_NODE].add_child(&leaf);
         }
+        // Add the title node
         if let Some(idx) = &self.title_ptr {
             let cell = &mut self.scene.views[*idx];
             let size = (cell.borrow()).get_content_size();
             let node_size = Size { width: size.x, height: size.y };
             let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[1].add_child(&leaf);
+            node.children()[TITLE_NODE].add_child(&leaf);
         }
 
         let layout = node.compute_layout(Size::undefined()).unwrap();
@@ -161,15 +156,16 @@ impl NavBar {
         let abs_layout = solver.absolute_layout(&layout);
         eprintln!("node_layout={:#?}", abs_layout);
 
-        if let Some(idx) = &self.left_btn_id {
-            let item = &abs_layout.children[0].children[0];
-            eprintln!("{} left={:?}", idx, item.location);
+        // Now that layout has been computed, reposition all the scene.buttons
+        for (i, idx) in self.left_btns.iter().enumerate() {
+            let item = &abs_layout.children[LEFT_NODE].children[i];
+            eprintln!("[{}] left={:?}", i, item.location);
             let cell = &mut self.scene.controls[*idx];
             (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
         }
-        if let Some(idx) = &self.right_btn_id {
-            let item = &abs_layout.children[2].children[0];
-            eprintln!("{} right={:?}", idx, item.location);
+        for (i, idx) in self.right_btns.iter().enumerate() {
+            let item = &abs_layout.children[RIGHT_NODE].children[i];
+            eprintln!("[{}] right={:?}", i, item.location);
             let cell = &mut self.scene.controls[*idx];
             (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
         }
