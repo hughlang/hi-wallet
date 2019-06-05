@@ -38,7 +38,7 @@ pub trait Controller {
     fn view_will_load(&mut self) {}
 
     /// Method to signal to controller that it will be leaving or entering the parent controller
-    fn will_transition_in(&mut self) {}
+    fn view_will_transition(&mut self, _event: NavEvent) {}
 
     /// The sync method is called from Quicksilver's update loop and eventually gets passed down
     /// to the Scene and lower level Tweek gui objects. It carries the AppContext as a mutable ref

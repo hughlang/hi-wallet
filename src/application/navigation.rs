@@ -169,6 +169,18 @@ impl Controller for NavController {
         (&mut *controller).view_will_load();
     }
 
+    fn view_will_transition(&mut self, event: NavEvent) {
+        match event {
+            NavEvent::Next => {
+                if let Some(target) = &self.next_target {
+                    self.show(target.controller.clone());
+                    self.next_target = None;
+                }
+            }
+            _ => {}
+        }
+    }
+
     #[allow(dead_code)]
     #[allow(unreachable_patterns)]
     fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {

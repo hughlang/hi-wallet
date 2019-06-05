@@ -89,12 +89,26 @@ impl Controller for HomeController {
     }
 
     fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
-        // let mut events = self.events.borrow_mut().queue();
-        // (*events).clear();
-        // for event in events.drain(..) {
+        // This is just placeholder code for future consideration of what kinds of events
+        // might get queued within this controller.
+        let mut nav_event: Option<NavEvent> = None;
+        if let Some(event) = self.events.borrow_mut().queue().first() {
+            match event.action {
+                Action::Button(tag) => {
+                    match tag {
+                        BACK_BUTTON => { nav_event = Some(NavEvent::Back) },
+                        NEXT_BUTTON => { nav_event = Some(NavEvent::Next) },
+                        _ => {}
+                    }
+                },
+                Action::Selected(idx) => { nav_event = Some(NavEvent::Selected(idx)) },
+                // _ => {}
+            }
+        }
+        if let Some(evt) = nav_event {
+            ctx.event_bus.register_event(evt);
+        }
 
-        // }
-        // *events;
         let _ = self.scene.update(window);
 
     }

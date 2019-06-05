@@ -85,6 +85,19 @@ impl State for Application {
             // TODO: Read EventBus
         }
 
+        for event in self.context.event_bus.into_iter() {
+            // Only listen for NavEvents
+            if let Ok(evt) = event.downcast_ref::<NavEvent>() {
+                /*
+                For nav events, tell the nav controller to begin transition. It should have a
+                "next_target" saved which identifies the next controller to transition in.
+                 */
+                if let Some(cell) = &mut self.front_controller {
+                    cell.borrow_mut().view_will_transition(*evt);
+                }
+            }
+        }
+
         Ok(())
     }
 
