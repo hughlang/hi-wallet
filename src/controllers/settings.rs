@@ -40,7 +40,7 @@ impl SettingsController {
 impl Controller for SettingsController {
 
     fn view_will_load(&mut self) {
-        let frame = Rectangle::new((10.0, 70.0), (self.frame.x() - 20.0, self.frame.y() - 90.0));
+        let frame = Rectangle::new((10.0, 70.0), (self.frame.width() - 20.0, self.frame.height() - 90.0));
         let line_color = Color::from_hex("#FFD700");
         let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 3.0, 0.0);
         let shape = ShapeView::new(frame).with_mesh(&mut mesh);

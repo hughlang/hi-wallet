@@ -7,6 +7,7 @@ use std::rc::{Rc, Weak};
 
 use quicksilver::{
     geom::{Rectangle, Vector},
+    graphics::Color,
     lifecycle::Window
 };
 
@@ -50,7 +51,7 @@ pub struct NavController {
 
 impl NavController {
     pub fn new(frame: Rectangle) -> Self {
-        let nav_frame = Rectangle::new((0.0, 0.0), (frame.x(), 50.0));
+        let nav_frame = Rectangle::new((0.0, 0.0), (frame.width(), 50.0));
         let navbar = NavBar::new(&nav_frame);
 
         let nav = NavController {
@@ -131,7 +132,7 @@ impl Controller for NavController {
     fn view_will_load(&mut self) {
 
         let theme = ThemeManager::nav_theme();
-        self.navbar.color = Some(theme.bg_color);
+        self.navbar.color = Some(Color::RED);
 
         if self.front_idx >= self.controllers.len() {
             return;

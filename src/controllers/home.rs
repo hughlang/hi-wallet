@@ -28,7 +28,7 @@ impl HomeController {
     pub fn new(frame: Rectangle) -> HomeController {
         let mut scene = Scene::new(&frame);
 
-        let box_frame = Rectangle::new((10.0, 70.0), (frame.x() - 20.0, frame.y() - 90.0));
+        let box_frame = Rectangle::new((10.0, 70.0), (frame.width() - 20.0, frame.height() - 90.0));
         let line_color = Color::from_hex("#CCCCCC");
         let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 1.0, 0.0);
         let shape = ShapeView::new(box_frame).with_mesh(&mut mesh);
