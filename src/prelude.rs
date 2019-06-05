@@ -1,1 +1,1 @@
-pub use crate::{application::*, controllers::*};
+pub use crate::{application::*, controllers::*, events::*};

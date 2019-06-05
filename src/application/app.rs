@@ -16,8 +16,18 @@ use quicksilver::{
 
 /// This is intended for passing around configuration and state information
 /// throughout the controller/scene hierarchy.
-pub struct AppState {
-    pub screen: (f32, f32),
+pub struct AppContext {
+    pub screen: Vector,
+    event_bus: EventBus,
+}
+
+impl AppContext {
+    pub fn new(screen: Vector) -> Self {
+        AppContext {
+            screen,
+            event_bus: EventBus::default(),
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -25,6 +35,7 @@ pub struct AppState {
 pub struct Application {
     screen: Vector,
     theme: Theme,
+    context: AppContext,
     tk_state: TKState,
     // nav_controller: NavController,
     front_controller: Option<Rc<RefCell<Controller>>>,
@@ -36,14 +47,19 @@ impl Application {
 
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
+
         let mut nav = NavController::new(screen);
-        let home = HomeController::new(screen, None);
+        // let rc = Rc::new(RefCell::new(nav));
+        // let weaknav = Rc::downgrade(&rc);
+        let home = HomeController::new(screen);
+
         nav.show(Rc::new(RefCell::new(home)));
         nav.view_will_load();
 
         let s = Application {
             screen,
             theme: ThemeManager::default_theme(),
+            context: AppContext::new(screen),
             tk_state: TKState::new(),
             // nav_controller: nav,
             front_controller: Some(Rc::new(RefCell::new(nav))),

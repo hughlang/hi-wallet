@@ -16,14 +16,14 @@ use tweek::{
     shared::DrawShape,
 };
 
-pub struct HomeController<'a> {
+pub struct HomeController {
     scene: Scene,
-    nav: Weak<RefCell<&'a NavController>>,
+    // nav: Weak<RefCell<NavController>>,
     events: Rc<RefCell<EventQueue>>,
 }
 
-impl<'a> HomeController<'a> {
-    pub fn new(screen: Vector, nav: Option<&NavController>) -> HomeController {
+impl HomeController {
+    pub fn new(screen: Vector) -> HomeController {
         let frame = Rectangle::new((0.0, 0.0), (screen.x, screen.y));
         let mut scene = Scene::new(&frame);
 
@@ -36,20 +36,36 @@ impl<'a> HomeController<'a> {
         // let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
         // let navbar = NavBar::new(&frame);
 
-        let mut controller = HomeController {
+        let controller = HomeController {
             scene,
-            nav: Weak::new(),
+            // nav: nav,
             events: EventQueue::new(),
         };
-        if let Some(nav) = nav {
-            let rc = Rc::new(RefCell::new(nav));
-            controller.nav = Rc::downgrade(&rc);
-        }
+
+        // if let Some(nav) = nav {
+        //     let rc = Rc::new(RefCell::new(nav));
+        //     controller.nav = Rc::downgrade(&rc);
+        // }
         controller
     }
 }
 
-impl<'a> Controller for HomeController<'a> {
+impl Controller for HomeController {
+    fn left_nav_items(&self) -> Vec<NavItem> {
+        let mut items: Vec<NavItem> = Vec::new();
+        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
+        let item = NavItem::new(BACK_BUTTON, btn);
+        items.push(item);
+        items
+    }
+
+    fn right_nav_items(&self) -> Vec<NavItem> {
+        let mut items: Vec<NavItem> = Vec::new();
+        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
+        let item = NavItem::new(NEXT_BUTTON, btn);
+        items.push(item);
+        items
+    }
 
     fn update(&mut self, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();
@@ -73,11 +89,11 @@ impl<'a> Controller for HomeController<'a> {
 
     fn handle_mouse_down(&mut self, pt: &Vector, state: &mut TKState) -> bool {
         println!(">>> handle_mouse_down");
-        if let Some(ref mut rc) = self.nav.upgrade() {
-            let mut nav = rc.borrow_mut();
-            (&mut *nav).notify("Booo");
-            // rc.borrow_mut().notify("Mouse down");
-        }
+        // if let Some(ref mut rc) = self.nav.upgrade() {
+        //     let mut nav = rc.borrow_mut();
+        //     (&mut *nav).notify("Booo");
+        //     // rc.borrow_mut().notify("Mouse down");
+        // }
         self.scene.handle_mouse_down(pt, state)
     }
 

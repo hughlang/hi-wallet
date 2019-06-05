@@ -1,6 +1,5 @@
 use super::*;
 use crate::controllers::*;
-use crate::utils::*;
 
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -23,14 +22,19 @@ use tweek::{
 };
 
 // Magic numbers for different nav commands
-const BACK_BUTTON: u32 = 10;
-const NEXT_BUTTON: u32 = 20;
+pub const BACK_BUTTON: u32 = 10;
+pub const NEXT_BUTTON: u32 = 20;
 
 pub struct NavController {
+    /// The controllers in the navigation stack.
     pub controllers: Vec<Rc<RefCell<Controller>>>,
+    /// Optional controller that can appear above this NavController
     pub modal_controller: Option<Rc<RefCell<Controller>>>,
-    pub show_nav: bool,
+    /// The index of the front view controller in the stack. Usually the last one, but not always.
+    front_idx: usize,
+    /// The standard nav bar which has buttons on left and right side. Should be optional later
     navbar: NavBar,
+    pub show_nav: bool,
     events: Rc<RefCell<EventQueue>>,
 }
 
@@ -42,10 +46,10 @@ impl NavController {
         let nav = NavController {
             controllers: Vec::new(),
             modal_controller: None,
-            show_nav: true,
+            front_idx: 0,
             navbar,
+            show_nav: true,
             events: EventQueue::new(),
-
         };
         // nav.events.borrow_mut().set_delegate(Rc::new(RefCell::new(nav)));
         nav
@@ -70,34 +74,39 @@ impl Controller for NavController {
         self.navbar.color = Some(theme.bg_color);
         self.navbar.set_title("Home");
 
-        let events = self.events.clone();
-        let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Back");
-        btn.set_onclick(move |_action, _tk| {
-            let mut notifier = Notifier::new();
-            events.borrow().register_to(&mut notifier);
-            let evt = Event::new(Action::Click(BACK_BUTTON));
-            notifier.notify(evt);
-        });
-        self.navbar.set_left_button(btn);
+        if self.front_idx >= self.controllers.len() {
+            return;
+        }
+        let mut controller = self.controllers[self.front_idx].borrow_mut();
 
-        let events = self.events.clone();
-        let mut btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
-        btn.set_onclick(move |_action, _tk| {
-            let mut notifier = Notifier::new();
-            events.borrow().register_to(&mut notifier);
-            let evt = Event::new(Action::Click(NEXT_BUTTON));
-            notifier.notify(evt);
+        for item in controller.left_nav_items() {
+            let events = self.events.clone();
+            let mut btn = item.button;
+            let tag = item.tag;
+            btn.set_onclick(move |_action, _tk| {
+                let mut notifier = Notifier::new();
+                events.borrow().register_to(&mut notifier);
+                let evt = Event::new(Action::Click(tag));
+                notifier.notify(evt);
+            });
+            self.navbar.set_left_button(btn);
+        }
 
-            // Ideally, this callback would directly execute a navigation action like this:
-            // navcontroller get target controller and show it
-        });
-        self.navbar.set_right_button(btn);
+        for item in controller.right_nav_items() {
+            let events = self.events.clone();
+            let mut btn = item.button;
+            let tag = item.tag;
+            btn.set_onclick(move |_action, _tk| {
+                let mut notifier = Notifier::new();
+                events.borrow().register_to(&mut notifier);
+                let evt = Event::new(Action::Click(tag));
+                notifier.notify(evt);
+            });
+            self.navbar.set_right_button(btn);
+        }
 
         self.navbar.layout_views();
-
-        if let Some(cell) = &mut self.controllers.last() {
-            (cell.borrow_mut()).view_will_load();
-        }
+        (&mut *controller).view_will_load();
     }
 
     fn update(&mut self, window: &mut Window) {
@@ -149,167 +158,3 @@ impl EventDelegate for NavController {
         eprintln!("NavController handle_event: {:?}", event);
     }
 }
-
-/// This is a simple nav bar that supports a left button, right button and title label in the middle.
-/// It does not yet support multiple buttons in the left and right side. And nor does it support
-/// toolbar-style nav bars which have collections of buttons (like in Material Design)
-pub struct NavBar {
-    pub frame: Rectangle,
-    pub scene: Scene,
-    pub color: Option<Color>,
-    title_ptr: Option<usize>,
-    left_btn_id: Option<usize>, // todo: make these a vec of usize IDs to allow multiple buttons
-    right_btn_id: Option<usize>,
-    layout: Option<Layout>,
-}
-
-impl NavBar {
-    pub fn new(frame: &Rectangle) -> Self {
-        let scene = Scene::new(frame);
-
-        NavBar {
-            frame: frame.clone(),
-            scene,
-            color: None,
-            title_ptr: None,
-            left_btn_id: None,
-            right_btn_id: None,
-            layout: None
-        }
-    }
-
-    pub fn set_title(&mut self, title: &str) {
-        let label = Label::new(&self.frame, title);
-        if let Some(idx) = &self.title_ptr {
-            self.scene.views[*idx] = Rc::new(RefCell::new(label));
-        } else {
-            self.scene.views.push(Rc::new(RefCell::new(label)));
-            self.title_ptr = Some(self.scene.views.len() - 1);
-        }
-    }
-
-    /// TODO: make it Option<Button> where None means remove the current button
-    pub fn set_left_button(&mut self, button: Button) {
-        if let Some(idx) = &self.left_btn_id {
-            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
-        } else {
-            self.scene.controls.push(Rc::new(RefCell::new(button)));
-            self.left_btn_id = Some(self.scene.controls.len() - 1);
-        }
-    }
-
-    /// TODO: make it Option<Button> where None means remove the current button
-    pub fn set_right_button(&mut self, button: Button) {
-        if let Some(idx) = &self.right_btn_id {
-            self.scene.controls[*idx] = Rc::new(RefCell::new(button));
-        } else {
-            self.scene.controls.push(Rc::new(RefCell::new(button)));
-            self.right_btn_id = Some(self.scene.controls.len() - 1);
-        }
-    }
-
-    /// This layout defines a % split of 20-60-20 for the 3 sections. Each section has children nodes and
-    /// only one node leaf is defined in each. Others could be added later.
-    /// See: https://vislyhq.github.io/stretch/docs/rust/
-    pub fn layout_views(&mut self) {
-
-        let cell_padding = Rect {
-            start: Dimension::Points(8.0),
-            end: Dimension::Points(8.0),
-            top: Dimension::Points(5.0),
-            bottom: Dimension::Points(5.0),
-            ..Default::default()
-        };
-
-        let node = Node::new(
-            Style {
-                size: Size { width: Dimension::Points(self.frame.size.x), height: Dimension::Points(50.0) },
-                ..Default::default()
-            },
-            vec![
-                &Node::new(
-                    Style {
-                        size: Size { width: Dimension::Percent(0.2), height: Dimension::Auto },
-                        justify_content: JustifyContent::FlexStart,
-                        align_items: AlignItems::Center,
-                        padding: cell_padding,
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-                &Node::new(
-                    Style {
-                        size: Size { width: Dimension::Percent(0.6), height: Dimension::Auto },
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        padding: cell_padding,
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-                &Node::new(
-                    Style {
-                        size: Size { width: Dimension::Percent(0.2), height: Dimension::Auto },
-                        justify_content: JustifyContent::FlexEnd,
-                        align_items: AlignItems::Center,
-                        padding: cell_padding,
-                        ..Default::default()
-                    },
-                    vec![],
-                ),
-            ],
-        );
-
-        if let Some(idx) = &self.left_btn_id {
-            let cell = &mut self.scene.controls[*idx];
-            let size = (cell.borrow()).get_content_size();
-            let node_size = Size { width: size.x, height: size.y };
-            let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[0].add_child(&leaf);
-        }
-        if let Some(idx) = &self.right_btn_id {
-            let cell = &mut self.scene.controls[*idx];
-            let size = (cell.borrow()).get_content_size();
-            let node_size = Size { width: size.x, height: size.y };
-            let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[2].add_child(&leaf);
-        }
-        if let Some(idx) = &self.title_ptr {
-            let cell = &mut self.scene.views[*idx];
-            let size = (cell.borrow()).get_content_size();
-            let node_size = Size { width: size.x, height: size.y };
-            let leaf = Node::new_leaf(Style::default(), Box::new(move |_| Ok(node_size)));
-            node.children()[1].add_child(&leaf);
-        }
-
-        let layout = node.compute_layout(Size::undefined()).unwrap();
-
-        let solver = LayoutSolver {};
-        let abs_layout = solver.absolute_layout(&layout);
-        eprintln!("node_layout={:#?}", abs_layout);
-
-        if let Some(idx) = &self.left_btn_id {
-            let item = &abs_layout.children[0].children[0];
-            eprintln!("{} left={:?}", idx, item.location);
-            let cell = &mut self.scene.controls[*idx];
-            (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
-        }
-        if let Some(idx) = &self.right_btn_id {
-            let item = &abs_layout.children[2].children[0];
-            eprintln!("{} right={:?}", idx, item.location);
-            let cell = &mut self.scene.controls[*idx];
-            (cell.borrow_mut()).set_origin(&Vector::new(item.location.x, item.location.y));
-        }
-
-        self.layout = Some(layout);
-    }
-
-    /// First renders the background and then the scene content
-    pub fn render(&mut self, theme: &mut Theme, window: &mut Window) {
-        if let Some(color) = &self.color {
-            window.draw(&self.frame, Col(*color));
-        }
-        let _ = self.scene.render(theme, window);
-    }
-}
-

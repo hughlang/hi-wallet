@@ -1,4 +1,4 @@
-// use super::*;
+use super::*;
 // use crate::prelude::*;
 use tweek::prelude::*;
 
@@ -28,6 +28,16 @@ pub trait Controller {
     fn handle_mouse_up(&mut self, _pt: &Vector, _state: &mut TKState) -> bool { false }
 
     fn handle_mouse_scroll(&mut self, _pt: &Vector) {}
+
+    /// The controller provides the list of nav items to appear in the navbar from left-to-right
+    fn left_nav_items(&self) -> Vec<NavItem> {
+        Vec::new()
+    }
+
+    /// The controller provides the list of nav items to appear in the navbar from left-to-right
+    fn right_nav_items(&self) -> Vec<NavItem> {
+        Vec::new()
+    }
 
 }
 
