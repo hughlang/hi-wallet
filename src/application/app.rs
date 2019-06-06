@@ -55,7 +55,7 @@ impl Application {
 
         let frame = Rectangle::new((0.0, 50.0), (screen.x, screen.y - 50.0));
         let home = HomeController::new(frame.clone());
-        nav.show(Rc::new(RefCell::new(home)));
+        nav.push_controller(Rc::new(RefCell::new(home)));
 
         nav.view_will_load();
 

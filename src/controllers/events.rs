@@ -119,5 +119,9 @@ impl EventQueue {
     pub fn queue(&mut self) -> &mut Vec<Event> {
         &mut self.events
     }
+
+    pub fn clear(&mut self) {
+        self.events.clear();
+    }
 }
 

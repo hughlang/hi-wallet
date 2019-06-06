@@ -26,16 +26,7 @@ pub struct HomeController {
 
 impl HomeController {
     pub fn new(frame: Rectangle) -> HomeController {
-        let mut scene = Scene::new(&frame);
-
-        let box_frame = Rectangle::new((10.0, 70.0), (frame.width() - 20.0, frame.height() - 90.0));
-        let line_color = Color::from_hex("#CCCCCC");
-        let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 1.0, 0.0);
-        let shape = ShapeView::new(box_frame).with_mesh(&mut mesh);
-        scene.views.push(Rc::new(RefCell::new(shape)));
-
-        // let frame = Rectangle::new((0.0, 0.0), (screen.x, 50.0));
-        // let navbar = NavBar::new(&frame);
+        let scene = Scene::new(&frame);
 
         let controller = HomeController {
             frame,
@@ -52,6 +43,14 @@ impl HomeController {
 }
 
 impl Controller for HomeController {
+
+    fn view_will_load(&mut self) {
+        let frame = Rectangle::new((10.0, 70.0), (self.frame.width() - 20.0, self.frame.height() - 90.0));
+        let line_color = Color::from_hex("#333333");
+        let mut mesh = DrawShape::rectangle(&frame, None, Some(line_color), 3.0, 0.0);
+        let shape = ShapeView::new(frame).with_mesh(&mut mesh);
+        self.scene.views.push(Rc::new(RefCell::new(shape)));
+    }
 
     fn screen_title(&self) -> &str {
         "Home"
