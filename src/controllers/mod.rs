@@ -1,7 +1,9 @@
-pub use self::events::*;
+pub use self::notify::*;
 pub use self::home::*;
+pub use self::profile::*;
 pub use self::settings::*;
 
 mod home;
-mod events;
+mod notify;
+mod profile;
 mod settings;

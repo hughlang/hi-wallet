@@ -85,6 +85,7 @@ impl State for Application {
             // TODO: Read EventBus
         }
 
+        // Dequeue events in EventBus and trigger controller lifecycle methods
         for event in self.context.event_bus.into_iter() {
             // Only listen for NavEvents
             if let Ok(evt) = event.downcast_ref::<NavEvent>() {

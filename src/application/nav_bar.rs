@@ -51,6 +51,14 @@ impl NavBar {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.scene.views.clear();
+        self.scene.controls.clear();
+        self.left_btns.clear();
+        self.right_btns.clear();
+        self.title_ptr = None;
+    }
+
     pub fn set_title(&mut self, title: &str) {
         let label = Label::new(&self.frame, title);
         if let Some(idx) = &self.title_ptr {

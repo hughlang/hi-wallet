@@ -9,10 +9,19 @@ use tweek::{
 };
 
 /// See: https://developer.apple.com/documentation/uikit/uimodaltransitionstyle
-pub enum ModalTransitionStyle {
+pub enum ModalDisplayStyle {
+    None,
     CoverVertical,
     FlipHorizontal,
     CrossDissolve,
+}
+
+pub enum TransitionState {
+    None,
+    Starting,
+    Running,
+    Finishing,
+    Completed,
 }
 
 /// The Controller trait will behave like iOS controllers that are generally view controllers
@@ -32,7 +41,7 @@ pub trait Controller {
     fn right_nav_items(&self) -> Vec<NavItem> { Vec::new() }
 
     /// Get next view controller to navigate to given a specified NavEvent (e.g. next, back, etc)
-    fn get_nav_target(&mut self, _event: &NavEvent) -> Option<NavTarget> { None }
+    fn nav_target_for_event(&mut self, _event: &NavEvent, _ctx: &mut AppContext) -> Option<NavTarget> { None }
 
     /// This is the first stage in the view lifecycle after new() is called. Here is where you should
     /// layout subviews, load data, and prepare for display.

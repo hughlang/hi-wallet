@@ -19,6 +19,7 @@ use tweek::{
 // Magic numbers for different nav commands
 pub const MODAL: u32 = 1;
 pub const BACK_BUTTON: u32 = 10;
+pub const CLOSE_BUTTON: u32 = 11;
 pub const NEXT_BUTTON: u32 = 20;
 
 pub struct NavTarget {
@@ -37,9 +38,9 @@ pub struct NavController {
     front_idx: usize,
     /// The standard nav bar which has buttons on left and right side. Should be optional later
     navbar: NavBar,
-    pub show_nav: bool,
     events: Rc<RefCell<EventQueue>>,
     next_target: Option<NavTarget>,
+    transition: TransitionState,
 }
 
 impl NavController {
@@ -53,17 +54,17 @@ impl NavController {
             modal_controller: None,
             front_idx: 0,
             navbar,
-            show_nav: true,
             events: EventQueue::new(),
             next_target: None,
+            transition: TransitionState::None,
         };
         nav
     }
 
     pub fn push_controller(&mut self, controller: Rc<RefCell<Controller>>) {
-        controller.borrow_mut().view_will_load();
         self.controllers.push(controller);
         self.front_idx = self.controllers.len() - 1;
+        self.view_will_load();
         // TODO: Transition
     }
 
@@ -71,6 +72,17 @@ impl NavController {
         if self.controllers.len() > 1 {
             let _ = self.controllers.pop();
             self.front_idx = self.controllers.len() - 1;
+        }
+    }
+
+    pub fn present_controller(&mut self, controller: Rc<RefCell<Controller>>, style: ModalDisplayStyle) {
+        match style {
+            ModalDisplayStyle::None => {
+                self.modal_controller = Some(controller);
+                self.view_will_load();
+                self.transition = TransitionState::Starting;
+            }
+            _ => {}
         }
     }
 
@@ -85,6 +97,7 @@ impl Controller for NavController {
 
     fn view_will_load(&mut self) {
         // FIXME: Stop creating copies
+        self.navbar.reset();
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);
 
@@ -125,6 +138,7 @@ impl Controller for NavController {
     }
 
     fn view_will_transition(&mut self, event: NavEvent) {
+        println!(">>> view_will_transition {:?}", event);
         match event {
             NavEvent::Back => {
                 self.pop_controller();
@@ -132,6 +146,12 @@ impl Controller for NavController {
             NavEvent::Next => {
                 if let Some(target) = &self.next_target {
                     self.push_controller(target.controller.clone());
+                    self.next_target = None;
+                }
+            }
+            NavEvent::Modal => {
+                if let Some(target) = &self.next_target {
+                    self.present_controller(target.controller.clone(), ModalDisplayStyle::None);
                     self.next_target = None;
                 }
             }
@@ -150,6 +170,7 @@ impl Controller for NavController {
                     match tag {
                         BACK_BUTTON => { nav_event = Some(NavEvent::Back) },
                         NEXT_BUTTON => { nav_event = Some(NavEvent::Next) },
+                        MODAL => { nav_event = Some(NavEvent::Modal) },
                         _ => {}
                     }
                 },
@@ -160,7 +181,7 @@ impl Controller for NavController {
 
         if let Some(evt) = nav_event {
             if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
-                if let Some(target) = controller.borrow_mut().get_nav_target(&evt) {
+                if let Some(target) = controller.borrow_mut().nav_target_for_event(&evt, ctx) {
                     self.next_target = Some(target);
                 }
             }
@@ -170,6 +191,9 @@ impl Controller for NavController {
         if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
             controller.borrow_mut().update(ctx, window);
         }
+        if let Some(modal) = &mut self.modal_controller {
+            modal.borrow_mut().update(ctx, window);
+        }
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {
@@ -177,6 +201,9 @@ impl Controller for NavController {
         let _ = self.navbar.render(theme, window);
         if let Some(cell) = &mut self.controllers.get_mut(self.front_idx) {
             (cell.borrow_mut()).render(theme, window);
+        }
+        if let Some(modal) = &mut self.modal_controller {
+            modal.borrow_mut().render(theme, window);
         }
     }
 

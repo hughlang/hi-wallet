@@ -72,7 +72,7 @@ impl Controller for HomeController {
         items
     }
 
-    fn get_nav_target(&mut self, event: &NavEvent) -> Option<NavTarget> {
+    fn nav_target_for_event(&mut self, event: &NavEvent, _ctx: &mut AppContext) -> Option<NavTarget> {
         match event {
             NavEvent::Next => {
                 let controller = SettingsController::new(self.frame.clone());
