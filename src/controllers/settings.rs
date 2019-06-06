@@ -61,13 +61,13 @@ impl Controller for SettingsController {
         items
     }
 
-    // fn right_nav_items(&self) -> Vec<NavItem> {
-    //     let mut items: Vec<NavItem> = Vec::new();
-    //     let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Next");
-    //     let item = NavItem::new(NEXT_BUTTON, btn);
-    //     items.push(item);
-    //     items
-    // }
+    fn right_nav_items(&self) -> Vec<NavItem> {
+        let mut items: Vec<NavItem> = Vec::new();
+        let btn = Button::new(Rectangle::new((0.0, 0.0), (40.0, 30.0))).with_text("Profile");
+        let item = NavItem::new(MODAL, btn);
+        items.push(item);
+        items
+    }
 
     fn get_nav_target(&mut self, evt: &NavEvent) -> Option<NavTarget> {
         // let controller = SettingsCont

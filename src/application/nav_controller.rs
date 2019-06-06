@@ -3,7 +3,7 @@ use crate::controllers::*;
 use crate::events::*;
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -17,6 +17,7 @@ use tweek::{
 };
 
 // Magic numbers for different nav commands
+pub const MODAL: u32 = 1;
 pub const BACK_BUTTON: u32 = 10;
 pub const NEXT_BUTTON: u32 = 20;
 
@@ -41,14 +42,6 @@ pub struct NavController {
     next_target: Option<NavTarget>,
 }
 
-// impl Copy for NavController { }
-
-// impl Clone for NavController {
-//     fn clone(&self) -> NavController {
-//         *self
-//     }
-// }
-
 impl NavController {
     pub fn new(frame: Rectangle) -> Self {
         let nav_frame = Rectangle::new((0.0, 0.0), (frame.width(), 50.0));
@@ -64,10 +57,6 @@ impl NavController {
             events: EventQueue::new(),
             next_target: None,
         };
-
-        // This shit don't work
-        // let weakself = Rc::downgrade(&Rc::new(RefCell::new(nav)));
-        // nav.events.borrow_mut().set_delegate(weakself);
         nav
     }
 
@@ -92,6 +81,8 @@ impl NavController {
 }
 
 impl Controller for NavController {
+
+
     fn view_will_load(&mut self) {
         // FIXME: Stop creating copies
         let theme = ThemeManager::nav_theme();
@@ -152,7 +143,8 @@ impl Controller for NavController {
     #[allow(unreachable_patterns)]
     fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
         let mut nav_event: Option<NavEvent> = None;
-        if let Some(event) = self.events.borrow_mut().queue().first() {
+        // Only handle one event per run loop cycle.
+        if let Some(event) = self.events.borrow_mut().queue().pop() {
             match event.action {
                 Action::Button(tag) => {
                     match tag {
@@ -165,7 +157,6 @@ impl Controller for NavController {
                 _ => {}
             }
         }
-        self.events.borrow_mut().clear();
 
         if let Some(evt) = nav_event {
             if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {

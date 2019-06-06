@@ -82,24 +82,6 @@ impl EventQueue {
         rc
     }
 
-    // Unused and not needed?
-    pub fn get(&mut self) -> Rc<RefCell<Self>> {
-        self.weak_self.upgrade().unwrap()
-    }
-
-    // Unused and doesn't work
-    pub fn set_delegate(&mut self, delegate: Weak<RefCell<EventDelegate>>) {
-        if let Some(rc) = delegate.upgrade() {
-            let weak_delegate = Rc::downgrade(&Rc::new(rc));
-            self.delegate = weak_delegate;
-        }
-    }
-
-    // Unused and doesn't work
-    pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
-        self.handlers.push(handler);
-    }
-
     pub fn register_to(&self, notifier: &mut Notifier) {
         let rc = self.weak_self.upgrade().unwrap();
         notifier.register(move |event| {
@@ -122,6 +104,19 @@ impl EventQueue {
 
     pub fn clear(&mut self) {
         self.events.clear();
+    }
+
+    // Unused and doesn't work
+    pub fn set_delegate(&mut self, delegate: Weak<RefCell<EventDelegate>>) {
+        if let Some(rc) = delegate.upgrade() {
+            let weak_delegate = Rc::downgrade(&Rc::new(rc));
+            self.delegate = weak_delegate;
+        }
+    }
+
+    // Unused and doesn't work
+    pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
+        self.handlers.push(handler);
     }
 }
 

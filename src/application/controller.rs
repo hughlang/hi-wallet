@@ -22,6 +22,7 @@ pub enum ModalTransitionStyle {
 pub trait Controller {
 
     /// Provides the title for NavController and NavBar to display
+    /// TODO: return struct with more information.
     fn screen_title(&self) -> &str { "" }
 
     /// The controller provides the list of nav items to appear in the navbar from left-to-right
@@ -30,14 +31,15 @@ pub trait Controller {
     /// The controller provides the list of nav items to appear in the navbar from left-to-right
     fn right_nav_items(&self) -> Vec<NavItem> { Vec::new() }
 
-    /// Get wrapper for next view controller to navigate to
+    /// Get next view controller to navigate to given a specified NavEvent (e.g. next, back, etc)
     fn get_nav_target(&mut self, _event: &NavEvent) -> Option<NavTarget> { None }
 
     /// This is the first stage in the view lifecycle after new() is called. Here is where you should
     /// layout subviews, load data, and prepare for display.
+    /// TODO: pass theme as param
     fn view_will_load(&mut self) {}
 
-    /// Method to signal to controller that it will be leaving or entering the parent controller
+    /// Method to signal that a controller will be leaving or entering the parent controller
     fn view_will_transition(&mut self, _event: NavEvent) {}
 
     /// The sync method is called from Quicksilver's update loop and eventually gets passed down
