@@ -20,5 +20,5 @@ pub enum NavEvent {
 
 impl AnyEvent for NavEvent {}
 
-pub type NavEventHandler = Fn(NavEvent) -> bool + 'static;
+pub type NavEventHandler = dyn Fn(NavEvent) -> bool + 'static;
 

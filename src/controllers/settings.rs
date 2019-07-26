@@ -12,7 +12,7 @@ use quicksilver::{
 };
 
 use tweek::{
-    core::{position, Ease, TKState, Tween},
+    core::{position, Ease, Playable, TKState, Tween},
     gui::{Button, Scene, ShapeView, TKDisplayable, TKResponder, Theme},
     shared::DrawShape,
 };
@@ -75,10 +75,11 @@ impl Controller for SettingsController {
                 // Start controller frame off-screen y
                 let frame = Rectangle::new((0.0, ctx.screen.y), ctx.screen);
                 let mut controller = ProfileController::new(frame);
-                let tween = Tween::with(0, &controller.scene.layer)
+                let mut tween = Tween::with(0, &controller.scene.layer)
                     .to(&[position(0.0, 0.0)])
                     .duration(2.0)
                     .ease(Ease::SineInOut);
+                &tween.play();
                 controller.scene.layer.animation = Some(tween);
 
                 let target = NavTarget {
@@ -99,7 +100,7 @@ impl Controller for SettingsController {
 
         // }
         // *events;
-        let _ = self.scene.update(window);
+        let _ = self.scene.update(window, Vector::ZERO);
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {

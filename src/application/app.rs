@@ -38,12 +38,12 @@ pub struct Application {
     context: AppContext,
     tk_state: TKState,
     // nav_controller: NavController,
-    front_controller: Option<Rc<RefCell<Controller>>>,
+    front_controller: Option<Rc<RefCell<dyn Controller>>>,
 }
 
 impl Application {
     pub fn new(screen: Vector) -> Result<Application> {
-        std::env::set_var("RUST_LOG", "main=trace,hi_wallet=debug");
+        std::env::set_var("RUST_LOG", "main=trace,tweek=trace");
 
         #[cfg(not(target_arch = "wasm32"))]
         env_logger::builder().default_format_timestamp(false).default_format_module_path(false).init();
@@ -150,7 +150,7 @@ impl State for Application {
                     // self.scene.handle_key_command(key, window);
                 }
             },
-            Event::Typed(c) => {
+            Event::Typed(_c) => {
                 // self.scene.handle_key_press(*c, window);
             }
             _ => {}

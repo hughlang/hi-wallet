@@ -3,7 +3,7 @@ use crate::application::*;
 use crate::events::*;
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -108,7 +108,7 @@ impl Controller for HomeController {
             ctx.event_bus.register_event(evt);
         }
 
-        let _ = self.scene.update(window);
+        let _ = self.scene.update(window, Vector::ZERO);
 
     }
 

@@ -1,10 +1,9 @@
 /// navbar
-use super::*;
-use crate::controllers::*;
+// use crate::controllers::*;
 use crate::utils::*;
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::{Rc};
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -19,8 +18,8 @@ use stretch::{
 };
 
 use tweek::{
-    core::{TKState},
-    gui::{Button, Label, Scene, TKDisplayable, TKResponder, Theme},
+    // core::{TKState},
+    gui::{Button, Label, Scene, TKDisplayable, Theme},
 };
 
 /// This is a simple nav bar that supports a left button, right button and title label in the middle.

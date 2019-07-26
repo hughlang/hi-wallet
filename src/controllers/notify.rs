@@ -17,7 +17,7 @@ impl<F: FnMut(Event)> EventListener for F {
 }
 
 pub struct Notifier {
-    listeners: Vec<Box<EventListener>>,
+    listeners: Vec<Box<dyn EventListener>>,
 }
 
 impl Notifier {
@@ -66,7 +66,7 @@ pub trait EventDelegate {
 pub struct EventQueue {
     weak_self: Weak<RefCell<EventQueue>>,
     delegate: Weak<Rc<RefCell<dyn EventDelegate>>>, // Does not work
-    handlers: Vec<Rc<RefCell<EventDelegate>>>,      // Does not work
+    handlers: Vec<Rc<RefCell<dyn EventDelegate>>>,      // Does not work
     events: Vec<Event>,
 }
 
@@ -107,7 +107,7 @@ impl EventQueue {
     }
 
     // Unused and doesn't work
-    pub fn set_delegate(&mut self, delegate: Weak<RefCell<EventDelegate>>) {
+    pub fn set_delegate(&mut self, delegate: Weak<RefCell<dyn EventDelegate>>) {
         if let Some(rc) = delegate.upgrade() {
             let weak_delegate = Rc::downgrade(&Rc::new(rc));
             self.delegate = weak_delegate;
@@ -115,7 +115,7 @@ impl EventQueue {
     }
 
     // Unused and doesn't work
-    pub fn add_handler(&mut self, handler: Rc<RefCell<EventDelegate>>) {
+    pub fn add_handler(&mut self, handler: Rc<RefCell<dyn EventDelegate>>) {
         self.handlers.push(handler);
     }
 }

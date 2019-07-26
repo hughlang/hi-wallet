@@ -3,7 +3,7 @@ use crate::application::*;
 use crate::events::*;
 
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
+use std::rc::{Rc};
 
 use quicksilver::{
     geom::{Rectangle, Vector},
@@ -11,6 +11,7 @@ use quicksilver::{
     lifecycle::{Window},
 };
 
+#[allow(unused_imports)]
 use tweek::{
     core::{TKState},
     gui::{Button, Scene, ShapeView, TKDisplayable, TKResponder, Theme},
@@ -66,20 +67,22 @@ impl Controller for ProfileController {
     //     items
     // }
 
-    fn nav_target_for_event(&mut self, evt: &NavEvent, _ctx: &mut AppContext) -> Option<NavTarget> {
+    fn nav_target_for_event(&mut self, _evt: &NavEvent, _ctx: &mut AppContext) -> Option<NavTarget> {
         // let controller = SettingsCont
         None
 
     }
 
-    fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
+    fn update(&mut self, _ctx: &mut AppContext, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();
         // (*events).clear();
         // for event in events.drain(..) {
 
         // }
         // *events;
-        let _ = self.scene.update(window);
+        eprintln!("update Profile y={:?}", self.scene.layer.frame.pos.y);
+
+        let _ = self.scene.update(window, Vector::ZERO);
     }
 
     fn render(&mut self, theme: &mut Theme, window: &mut Window) {

@@ -7,5 +7,5 @@ pub enum WindowEvent {
 
 impl AnyEvent for WindowEvent {}
 
-pub type WindowEventHandler = Fn(WindowEvent) -> bool + 'static;
+pub type WindowEventHandler = dyn Fn(WindowEvent) -> bool + 'static;
 

@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use quicksilver::{
     geom::{Rectangle, Vector},
-    graphics::Color,
+    // graphics::Color,
     lifecycle::Window
 };
 
@@ -24,16 +24,16 @@ pub const NEXT_BUTTON: u32 = 20;
 
 pub struct NavTarget {
     pub nav_event: NavEvent,
-    pub controller: Rc<RefCell<Controller>>,
+    pub controller: Rc<RefCell<dyn Controller>>,
 }
 
 #[allow(dead_code)]
 pub struct NavController {
     frame: Rectangle,
     /// The controllers in the navigation stack.
-    controllers: Vec<Rc<RefCell<Controller>>>,
+    controllers: Vec<Rc<RefCell<dyn Controller>>>,
     /// Optional controller that can appear above this NavController
-    modal_controller: Option<Rc<RefCell<Controller>>>,
+    modal_controller: Option<Rc<RefCell<dyn Controller>>>,
     /// The index of the front view controller in the stack. Usually the last one, but not always.
     front_idx: usize,
     /// The standard nav bar which has buttons on left and right side. Should be optional later
@@ -61,7 +61,7 @@ impl NavController {
         nav
     }
 
-    pub fn push_controller(&mut self, controller: Rc<RefCell<Controller>>) {
+    pub fn push_controller(&mut self, controller: Rc<RefCell<dyn Controller>>) {
         self.controllers.push(controller);
         self.front_idx = self.controllers.len() - 1;
         self.view_will_load();
@@ -75,7 +75,7 @@ impl NavController {
         }
     }
 
-    pub fn present_controller(&mut self, controller: Rc<RefCell<Controller>>, style: ModalDisplayStyle) {
+    pub fn present_controller(&mut self, controller: Rc<RefCell<dyn Controller>>, style: ModalDisplayStyle) {
         match style {
             ModalDisplayStyle::None => {
                 self.modal_controller = Some(controller);
@@ -145,13 +145,17 @@ impl Controller for NavController {
             }
             NavEvent::Next => {
                 if let Some(target) = &self.next_target {
-                    self.push_controller(target.controller.clone());
+                    // Clone it first to avoid this problem:
+                    // https://github.com/rust-lang/rust/issues/59159
+                    let mc = target.controller.clone();
+                    self.push_controller(mc);
                     self.next_target = None;
                 }
             }
             NavEvent::Modal => {
                 if let Some(target) = &self.next_target {
-                    self.present_controller(target.controller.clone(), ModalDisplayStyle::None);
+                    let mc = target.controller.clone();
+                    self.present_controller(mc, ModalDisplayStyle::None);
                     self.next_target = None;
                 }
             }
@@ -188,10 +192,8 @@ impl Controller for NavController {
             ctx.event_bus.register_event(evt);
         }
 
-        if let Some(controller) = &mut self.controllers.get_mut(self.front_idx) {
-            controller.borrow_mut().update(ctx, window);
-        }
         if let Some(modal) = &mut self.modal_controller {
+            // eprintln!("update modal");
             modal.borrow_mut().update(ctx, window);
         }
     }
@@ -203,6 +205,7 @@ impl Controller for NavController {
             (cell.borrow_mut()).render(theme, window);
         }
         if let Some(modal) = &mut self.modal_controller {
+            // eprintln!("render modal");
             modal.borrow_mut().render(theme, window);
         }
     }
