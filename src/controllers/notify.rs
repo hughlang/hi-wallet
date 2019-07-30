@@ -96,6 +96,9 @@ impl EventQueue {
         if let Some(delegate) = self.delegate.upgrade() {
             delegate.borrow_mut().handle_event(evt.clone());
         }
+        for handler in &mut self.handlers {
+            handler.borrow_mut().handle_event(evt.clone());
+        }
     }
 
     pub fn queue(&mut self) -> &mut Vec<Event> {

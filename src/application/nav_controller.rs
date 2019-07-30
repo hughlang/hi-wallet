@@ -41,6 +41,7 @@ pub struct NavController {
     events: Rc<RefCell<EventQueue>>,
     next_target: Option<NavTarget>,
     transition: TransitionState,
+    event_layer: EventLayer,
 }
 
 impl NavController {
@@ -57,6 +58,7 @@ impl NavController {
             events: EventQueue::new(),
             next_target: None,
             transition: TransitionState::None,
+            event_layer: EventLayer::new(),
         };
         nav
     }
@@ -78,8 +80,8 @@ impl NavController {
     pub fn present_controller(&mut self, controller: Rc<RefCell<dyn Controller>>, style: ModalDisplayStyle) {
         match style {
             ModalDisplayStyle::None => {
+                controller.borrow_mut().view_will_load();
                 self.modal_controller = Some(controller);
-                self.view_will_load();
                 self.transition = TransitionState::Starting;
             }
             _ => {}
@@ -100,7 +102,8 @@ impl Controller for NavController {
         self.navbar.reset();
         let theme = ThemeManager::nav_theme();
         self.navbar.color = Some(theme.bg_color);
-
+        let cell = Rc::new(RefCell::new(self.event_layer));
+        self.events.borrow_mut().add_handler(cell);
         if self.front_idx >= self.controllers.len() {
             return;
         }
@@ -147,6 +150,7 @@ impl Controller for NavController {
                 if let Some(target) = &self.next_target {
                     // Clone it first to avoid this problem:
                     // https://github.com/rust-lang/rust/issues/59159
+                    // Note this is a Rc-Refcell clone.
                     let mc = target.controller.clone();
                     self.push_controller(mc);
                     self.next_target = None;
@@ -237,3 +241,29 @@ impl EventDelegate for NavController {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct EventLayer {
+    pub id: u32,
+}
+
+impl EventLayer {
+    pub fn new() -> Self {
+        EventLayer {
+            id: 0,
+        }
+    }
+}
+
+// impl Copy for EventLayer { }
+
+// impl Clone for EventLayer {
+//     fn clone(&self) -> EventLayer {
+//         *self
+//     }
+// }
+
+impl EventDelegate for EventLayer {
+    fn handle_event(&mut self, event: Event) {
+        eprintln!("NavController handle_event: {:?}", event);
+    }
+}

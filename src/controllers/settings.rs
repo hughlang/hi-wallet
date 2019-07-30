@@ -77,9 +77,10 @@ impl Controller for SettingsController {
                 let mut controller = ProfileController::new(frame);
                 let mut tween = Tween::with(0, &controller.scene.layer)
                     .to(&[position(0.0, 0.0)])
-                    .duration(2.0)
+                    .duration(0.7)
                     .ease(Ease::SineInOut);
                 &tween.play();
+                controller.scene.bg_color = Some(Color::WHITE);
                 controller.scene.layer.animation = Some(tween);
 
                 let target = NavTarget {
@@ -93,7 +94,7 @@ impl Controller for SettingsController {
         None
     }
 
-    fn update(&mut self, ctx: &mut AppContext, window: &mut Window) {
+    fn update(&mut self, _ctx: &mut AppContext, window: &mut Window) {
         // let mut events = self.events.borrow_mut().queue();
         // (*events).clear();
         // for event in events.drain(..) {

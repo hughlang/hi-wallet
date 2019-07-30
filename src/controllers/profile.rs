@@ -80,7 +80,6 @@ impl Controller for ProfileController {
 
         // }
         // *events;
-        eprintln!("update Profile y={:?}", self.scene.layer.frame.pos.y);
 
         let _ = self.scene.update(window, Vector::ZERO);
     }
